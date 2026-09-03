@@ -1,0 +1,6505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FRONTIER Alpha 0.9995</title>
+
+<style>
+*{box-sizing:border-box}
+
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#111;
+    font-family:Arial,sans-serif;
+    user-select:none;
+}
+
+canvas{display:block}
+
+button{
+    font-family:inherit;
+    cursor:pointer;
+}
+
+#start{
+    position:fixed;
+    inset:0;
+    z-index:100;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    background:radial-gradient(circle,#607d49,#172118 72%);
+}
+
+#startBox{
+    width:min(680px,92vw);
+    text-align:center;
+    padding:48px 35px;
+    border-radius:22px;
+    border:1px solid rgba(255,255,255,.15);
+    background:rgba(8,12,8,.9);
+}
+
+#title{
+    font-size:clamp(46px,9vw,76px);
+    font-weight:900;
+    letter-spacing:8px;
+}
+
+#version{
+    margin-top:6px;
+    letter-spacing:4px;
+    opacity:.55;
+}
+
+#tagline{
+    margin-top:20px;
+    opacity:.7;
+}
+
+#enter{
+    margin-top:30px;
+    padding:16px 38px;
+    border:0;
+    border-radius:10px;
+    font-size:18px;
+    font-weight:900;
+    background:#f2ecdd;
+    color:#171714;
+}
+
+.instructions{
+    margin-top:25px;
+    line-height:1.9;
+    font-size:13px;
+    opacity:.72;
+}
+
+#hud{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:20;
+    color:white;
+    pointer-events:none;
+}
+
+#stats{
+    position:absolute;
+    left:18px;
+    top:18px;
+    min-width:185px;
+    padding:13px 16px;
+    border-radius:12px;
+    background:rgba(0,0,0,.58);
+}
+
+.logo{
+    font-weight:900;
+    letter-spacing:2px;
+    margin-bottom:8px;
+}
+
+.stat{
+    margin:5px 0;
+    font-size:14px;
+}
+
+#gameClock{
+    margin-top:9px;
+    padding-top:8px;
+    border-top:1px solid rgba(255,255,255,.18);
+    font-family:Consolas,Monaco,monospace;
+    font-size:22px;
+    font-weight:900;
+    letter-spacing:2px;
+}
+
+#timeLabel{
+    margin-top:2px;
+    font-size:10px;
+    letter-spacing:1.5px;
+    opacity:.62;
+}
+
+#goalBox{
+    position:absolute;
+    right:18px;
+    top:18px;
+    width:280px;
+    padding:14px;
+    border-radius:12px;
+    background:rgba(0,0,0,.62);
+}
+
+#goalTitle{
+    font-size:11px;
+    letter-spacing:2px;
+    opacity:.55;
+}
+
+#goalText{
+    margin-top:6px;
+    font-size:14px;
+    font-weight:bold;
+    line-height:1.45;
+}
+
+#modeIndicator{
+    position:absolute;
+    left:50%;
+    top:18px;
+    transform:translateX(-50%);
+    padding:8px 12px;
+    border-radius:8px;
+    background:rgba(0,0,0,.55);
+    font-size:11px;
+}
+
+#crosshair{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:white;
+    transform:translate(-50%,-50%);
+}
+
+#prompt{
+    position:absolute;
+    left:50%;
+    top:57%;
+    transform:translateX(-50%);
+    padding:9px 15px;
+    border-radius:8px;
+    background:rgba(0,0,0,.72);
+    font-size:14px;
+    opacity:0;
+}
+
+#message{
+    position:absolute;
+    left:50%;
+    top:21%;
+    transform:translateX(-50%);
+    padding:11px 18px;
+    border-radius:9px;
+    background:rgba(0,0,0,.78);
+    font-weight:bold;
+    opacity:0;
+}
+
+#hotbar{
+    position:absolute;
+    left:50%;
+    bottom:22px;
+    transform:translateX(-50%);
+    display:flex;
+    gap:7px;
+    pointer-events:auto;
+}
+
+.hotbarSlot{
+    position:relative;
+    width:78px;
+    height:72px;
+    border:2px solid rgba(255,255,255,.22);
+    border-radius:10px;
+    background:rgba(15,15,15,.82);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+}
+
+.hotbarSlot.selected{
+    border-color:white;
+    background:rgba(84,106,68,.96);
+    transform:translateY(-5px);
+}
+
+.slotNumber{
+    position:absolute;
+    left:6px;
+    top:4px;
+    font-size:11px;
+    opacity:.6;
+}
+
+.itemIcon{
+    font-size:27px;
+}
+
+.itemName{
+    margin-top:4px;
+    font-size:10px;
+}
+
+.itemCount{
+    position:absolute;
+    right:6px;
+    bottom:5px;
+    font-size:11px;
+    font-weight:bold;
+}
+
+#heldItem{
+    position:absolute;
+    right:4%;
+    bottom:5%;
+    font-size:82px;
+    transform:rotate(-18deg);
+    transform-origin:bottom right;
+}
+
+#backpackButton{
+    position:absolute;
+    right:20px;
+    bottom:20px;
+    pointer-events:auto;
+    padding:11px 15px;
+    border:1px solid rgba(255,255,255,.2);
+    border-radius:10px;
+    color:white;
+    background:rgba(0,0,0,.68);
+    font-weight:bold;
+}
+
+.overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:75;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,.66);
+}
+
+.panel{
+    width:min(760px,92vw);
+    max-height:88vh;
+    overflow:auto;
+    padding:22px;
+    border:2px solid #555247;
+    border-radius:18px;
+    background:#292923;
+    color:white;
+}
+
+.panelHeader{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:16px;
+}
+
+.panelTitle{
+    font-size:24px;
+    font-weight:900;
+}
+
+.closeButton{
+    padding:9px 13px;
+    border:0;
+    border-radius:8px;
+    color:white;
+    background:#45453e;
+}
+
+#inventoryGrid,#storageGrid{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:9px;
+}
+
+.inventorySlot{
+    min-height:88px;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    border:2px solid #45453e;
+    border-radius:10px;
+    background:#1c1c18;
+}
+
+.backpackHotbarSlot{
+    background:#20251d;
+}
+
+
+.buildTabs{
+    display:flex;
+    gap:8px;
+    margin-bottom:14px;
+}
+.buildTab{
+    flex:1;
+    padding:10px 12px;
+    border:1px solid #535348;
+    border-radius:9px;
+    background:#25251f;
+    color:white;
+    font-weight:800;
+    cursor:pointer;
+}
+.buildTab.active{
+    background:#586a46;
+    border-color:#83986c;
+}
+#moveGrid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+}
+.moveCard{
+    padding:15px;
+    border:2px solid #48483f;
+    border-radius:13px;
+    background:#1c1c18;
+    cursor:pointer;
+}
+.moveCard:hover{border-color:#7c9270;}
+.moveCardTitle{font-weight:900;margin-bottom:5px;}
+.moveCardSub{font-size:11px;opacity:.65;}
+
+#buildingGrid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+}
+
+.buildingCard{
+    padding:17px;
+    min-height:145px;
+    border:2px solid #48483f;
+    border-radius:13px;
+    background:#1c1c18;
+}
+
+.buildingCard.locked{
+    opacity:.38;
+}
+
+.buildingIcon{font-size:34px}
+.buildingName{margin-top:6px;font-size:18px;font-weight:900}
+.buildingDescription{margin-top:5px;font-size:12px;opacity:.65}
+.buildingCost{margin-top:10px;font-size:13px}
+
+#placementUI{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:60;
+    pointer-events:none;
+}
+
+#placementHeader{
+    position:absolute;
+    left:50%;
+    top:15px;
+    transform:translateX(-50%);
+    padding:11px 18px;
+    border-radius:12px;
+    color:white;
+    background:rgba(15,15,13,.93);
+}
+
+#placementHelp{
+    position:absolute;
+    left:50%;
+    bottom:18px;
+    transform:translateX(-50%);
+    padding:10px 15px;
+    border-radius:9px;
+    color:white;
+    background:rgba(15,15,13,.92);
+    font-size:12px;
+}
+
+#placementInfo{
+    position:absolute;
+    left:18px;
+    top:18px;
+    width:220px;
+    padding:13px;
+    border-radius:12px;
+    color:white;
+    background:rgba(15,15,13,.9);
+}
+
+.materialRow{
+    display:flex;
+    justify-content:space-between;
+    margin:9px 0;
+    padding:12px;
+    border-radius:9px;
+    background:#1d1d19;
+}
+
+.actionButton{
+    width:100%;
+    margin-top:12px;
+    padding:12px;
+    border:0;
+    border-radius:9px;
+    background:#718b57;
+    color:white;
+    font-weight:900;
+}
+
+.actionButton.secondary{
+    background:#474740;
+}
+
+
+/* WORKSHOP */
+#workshopMenu .stationGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.stationCard{padding:16px;border:2px solid #48483f;border-radius:12px;background:#1c1c18}
+.stationCard h3{margin:0 0 6px;font-size:18px}
+.stationCard p{margin:5px 0;font-size:12px;opacity:.68;line-height:1.45}
+.stationCard .recipeLine{margin-top:10px;font-size:13px;font-weight:800}
+.stationCard button{margin-top:10px;padding:10px 12px;border:0;border-radius:8px;background:#718b57;color:white;font-weight:900}
+.stationCard button:disabled{opacity:.4;cursor:not-allowed}
+
+</style>
+</head>
+
+<body>
+
+<div id="start">
+    <div id="startBox">
+        <div id="title">FRONTIER</div>
+        <div id="version">ALPHA 0.9995</div>
+        <div id="tagline">Build a life from the ground up.</div>
+
+        <button id="enter">ENTER WORLD</button>
+
+        <div class="instructions">
+            WASD Move<br>
+            Hold Mouse + Drag Look<br>
+            SHIFT Sprint<br>
+            1–5 Hotbar<br>
+            Q Gather / Mine<br>E Eat / Interact<br>
+            I Backpack<br>
+            B Building Menu
+        </div>
+    </div>
+</div>
+
+<div id="hud">
+
+    <div id="stats">
+        <div class="logo">FRONTIER</div>
+        <div class="stat">🪵 Wood: <span id="woodCount">0</span></div>
+        <div class="stat">🪨 Stone: <span id="stoneCount">0</span></div>
+        <div class="stat">🏠 Progress: <span id="progressCount">Camp</span></div>
+        <div class="stat">🍽️ Hunger: <span id="hungerCount">100</span>%</div>
+        <div id="gameClock">7:00 AM</div>
+        <div id="timeLabel">MORNING • DAY 1</div>
+    </div>
+
+    <div id="goalBox">
+        <div id="goalTitle">CURRENT GOAL</div>
+        <div id="goalText"></div>
+    </div>
+
+    <div id="modeIndicator">EXPLORATION</div>
+
+    <div id="crosshair"></div>
+    <div id="prompt"></div>
+    <div id="message"></div>
+    <div id="heldItem"></div>
+
+    <div id="hotbar">
+        <div class="hotbarSlot" data-index="0"></div>
+        <div class="hotbarSlot" data-index="1"></div>
+        <div class="hotbarSlot" data-index="2"></div>
+        <div class="hotbarSlot" data-index="3"></div>
+        <div class="hotbarSlot" data-index="4"></div>
+    </div>
+
+    <button id="backpackButton">🎒 Backpack [I]</button>
+</div>
+
+<div id="backpack" class="overlay">
+    <div class="panel">
+        <div class="panelHeader">
+            <div class="panelTitle">🎒 BACKPACK</div>
+            <button class="closeButton" id="closeBackpack">CLOSE</button>
+        </div>
+        <div id="inventoryGrid"></div>
+    </div>
+</div>
+
+<div id="buildingMenu" class="overlay">
+    <div class="panel">
+        <div class="panelHeader">
+            <div class="panelTitle">BUILD MODE</div>
+            <button class="closeButton" id="closeBuildingMenu">CLOSE</button>
+        </div>
+        <div class="buildTabs">
+            <button id="buildTab" class="buildTab active">BUILD</button>
+            <button id="moveTab" class="buildTab">MOVE</button>
+        </div>
+        <div id="buildingGrid"></div>
+        <div id="moveGrid" style="display:none"></div>
+    </div>
+</div>
+
+<div id="placementUI">
+    <div id="placementHeader">PLACE CONSTRUCTION SITE</div>
+    <div id="placementInfo"></div>
+    <div id="placementHelp">MOVE MOUSE • R ROTATE • CLICK CONFIRM • ESC CANCEL</div>
+</div>
+
+<div id="projectMenu" class="overlay">
+    <div class="panel">
+        <div class="panelHeader">
+            <div>
+                <div id="projectTitle" class="panelTitle"></div>
+                <div id="projectStage"></div>
+            </div>
+            <button class="closeButton" id="closeProject">CLOSE</button>
+        </div>
+
+        <div id="projectMaterials"></div>
+
+        <button class="actionButton" id="depositMaterials">
+            DEPOSIT MATERIALS
+        </button>
+
+        <button class="actionButton secondary" id="cancelProject">
+            CANCEL PROJECT
+        </button>
+    </div>
+</div>
+
+<div id="storageMenu" class="overlay">
+    <div class="panel">
+        <div class="panelHeader">
+            <div><div class="panelTitle" id="storageTitle">📦 STORAGE</div><div id="storageInfo" style="font-size:12px;opacity:.65;margin-top:4px"></div></div>
+            <button class="closeButton" id="closeStorage">CLOSE</button>
+        </div>
+        <div id="storageGrid"></div><button class="actionButton" id="upgradeStorage" style="display:none">UPGRADE STORAGE SHED</button>
+    </div>
+</div>
+
+<div id="workshopMenu" class="overlay">
+    <div class="panel">
+        <div class="panelHeader">
+            <div><div class="panelTitle" id="workshopTitle">🪚 WORKSHOP</div><div id="workshopInfo" style="font-size:12px;opacity:.65;margin-top:4px"></div></div>
+            <button class="closeButton" id="closeWorkshop">CLOSE</button>
+        </div>
+        <div id="workshopContent" class="stationGrid"></div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+
+<script>
+window.addEventListener("load",function(){
+
+const ITEMS={
+    axe:{name:"Axe",icon:"🪓",type:"tool"},
+    pickaxe:{name:"Pickaxe",icon:"⛏️",type:"tool"},
+    wood:{name:"Wood",icon:"🪵",type:"material"},
+    stone:{name:"Stone",icon:"🪨",type:"material"},
+    rawIron:{name:"Raw Iron",icon:"🟤",type:"material"},
+    iron:{name:"Iron",icon:"⚙️",type:"material"},
+    lumber:{name:"Lumber",icon:"🪚",type:"material"},
+    cutStone:{name:"Cut Stone",icon:"🧱",type:"material"},
+    steel:{name:"Steel",icon:"🔩",type:"material"},
+    berries:{name:"Berries",icon:"🫐",type:"food"},
+    sapling:{name:"Sapling",icon:"🌱",type:"plantable"},
+    packedTent:{name:"Packed Tent",icon:"⛺",type:"portable"}
+};
+
+const BUILDINGS={
+    storage:{
+        name:"Storage Shed",
+        icon:"📦",
+        description:"Provides permanent material storage.",
+        wood:36,
+        stone:18,
+        lumber:0,
+        iron:0,
+        width:6,
+        depth:5,
+        unlock:0
+    },
+
+    workshop:{
+        name:"Workshop",
+        icon:"🪚",
+        description:"Unlocks crafting, processed materials, and the Cabin.",
+        wood:60,
+        stone:30,
+        lumber:0,
+        iron:0,
+        width:8,
+        depth:6,
+        unlock:1
+    },
+
+    cabin:{
+        name:"Cabin",
+        icon:"🏠",
+        description:"A permanent home. Unlocks only after the Workshop.",
+        wood:0,
+        stone:0,
+        lumber:80,
+        iron:25,
+        width:9,
+        depth:8,
+        unlock:2
+    }
+};
+
+const game={
+    cabinInteriorNoShadows:false,
+    running:false,
+    mode:"explore",
+
+    // Backpack is exactly 5 stack slots. Materials stack to 50.
+    // Tools use one whole slot and never stack.
+    backpack:[
+        {id:"wood",count:3},
+        null,
+        null,
+        null,
+        null
+    ],
+
+    // Hotbar normally contains tools; berries may also be assigned as quick-use food.
+    hotbar:[
+        "axe",
+        "pickaxe",
+        null,
+        null,
+        null
+    ],
+
+    // Starting Storage Crate: 5 stacks.
+    starterCrate:{
+        name:"Storage Crate",
+        level:0,
+        capacity:5,
+        slots:[{id:"wood",count:5},{id:"stone",count:2},null,null,null]
+    },
+
+    activeStorage:null,
+    activeWorkshop:null,
+    axeReinforced:false,
+    pickaxeReinforced:false,
+
+    // One complete in-game day is 30 real minutes.
+    // 06:00-18:00 = 15 real minutes of daylight.
+    // 18:00-06:00 = 15 real minutes of night.
+    dayNumber:1,
+    timeOfDayMinutes:420,
+    hunger:100,
+    hungerActionTimer:0,
+    hungerDrainPerRealSecond:100/5400,
+    sleeping:false,
+    tentPacked:false,
+    cabinBuilt:false,
+    toolDurability:{axe:120,pickaxe:120},
+    toolMaxDurability:{axe:120,pickaxe:120},
+
+    selectedHotbar:0,
+    resources:[],
+    wildlife:[],
+    collisions:[],
+
+    // 1.000 engine bootstrap: build the heavy world gradually after the page
+    // has painted so embeds show the FRONTIER start screen quickly.
+    worldReady:false,
+    worldBuilding:false,
+    worldChunksBuilt:0,
+    worldChunksTotal:0,
+    enterRequested:false,
+    projects:[],
+    finishedBuildings:[],
+
+    completed:{
+        storage:false,
+        workshop:false,
+        cabin:false
+    },
+
+    selectedBuilding:null,
+    placementGhost:null,
+    placementPosition:null,
+    placementRotation:0,
+    activeProject:null
+};
+
+const scene=new THREE.Scene();
+
+scene.background=
+    new THREE.Color(0x86bade);
+
+scene.fog=
+    new THREE.Fog(
+        0x86bade,
+        180,
+        700
+    );
+
+const camera=
+    new THREE.PerspectiveCamera(
+        72,
+        innerWidth/innerHeight,
+        .1,
+        1200
+    );
+
+const renderer=
+    new THREE.WebGLRenderer({
+        antialias:true
+    });
+
+renderer.setSize(
+    innerWidth,
+    innerHeight
+);
+
+renderer.setPixelRatio(
+    Math.min(devicePixelRatio,2)
+);
+
+renderer.shadowMap.enabled=false;
+
+renderer.domElement.style.position="fixed";
+renderer.domElement.style.inset="0";
+renderer.domElement.style.zIndex="0";
+
+document.body.appendChild(
+    renderer.domElement
+);
+
+const player={
+    position:new THREE.Vector3(
+        0,
+        1.8,
+        8
+    ),
+
+    yaw:0,
+    pitch:0,
+
+    normalSpeed:7,
+    sprintSpeed:12
+};
+
+camera.position.copy(
+    player.position
+);
+
+const hemiLight=
+    new THREE.HemisphereLight(
+        0xccecff,
+        0x395229,
+        1.7
+    );
+
+scene.add(hemiLight);
+
+const sunLight=
+    new THREE.DirectionalLight(
+        0xfff2cf,
+        2
+    );
+
+sunLight.castShadow=true;
+scene.add(sunLight);
+
+const moonLight=
+    new THREE.DirectionalLight(
+        0x9bb7ff,
+        0
+    );
+
+scene.add(moonLight);
+
+/* Visible sun and moon that travel across the sky. */
+const sunDisc=new THREE.Mesh(
+    new THREE.SphereGeometry(3.4,24,24),
+    new THREE.MeshBasicMaterial({color:0xffdf70})
+);
+scene.add(sunDisc);
+
+const moonDisc=new THREE.Mesh(
+    new THREE.SphereGeometry(2.7,24,24),
+    new THREE.MeshBasicMaterial({color:0xdde7ff})
+);
+scene.add(moonDisc);
+
+const skyDay=new THREE.Color(0x86bade);
+const skyDawn=new THREE.Color(0xd88967);
+const skyNight=new THREE.Color(0x071126);
+const fogDay=new THREE.Color(0x86bade);
+const fogNight=new THREE.Color(0x10192d);
+
+const ground=
+    new THREE.Mesh(
+
+        new THREE.PlaneGeometry(
+            930,
+            930
+        ),
+
+        new THREE.MeshStandardMaterial({
+            color:0x668e48,
+            roughness:1
+        })
+
+    );
+
+ground.rotation.x=
+    -Math.PI/2;
+
+ground.receiveShadow=true;
+
+scene.add(ground);
+
+function random(min,max){
+    return min+
+        Math.random()*
+        (max-min);
+}
+
+function distanceXZ(a,b){
+    return Math.hypot(
+        a.x-b.x,
+        a.z-b.z
+    );
+}
+
+/* ======================================================
+   TENT — COMPLETELY OPEN FRONT
+====================================================== */
+
+
+function createFrontierLantern(scale=1){
+    const g=new THREE.Group();
+    const metal=new THREE.MeshStandardMaterial({color:0x2d2a24,roughness:.8,metalness:.25});
+    const glass=new THREE.MeshStandardMaterial({color:0xffc56a,emissive:0xff8b2e,emissiveIntensity:.75,transparent:true,opacity:.72,roughness:.2});
+    const add=(mesh,y)=>{mesh.position.y=y*scale;g.add(mesh);};
+    add(new THREE.Mesh(new THREE.CylinderGeometry(.24*scale,.29*scale,.13*scale,10),metal),.065);
+    add(new THREE.Mesh(new THREE.CylinderGeometry(.19*scale,.22*scale,.08*scale,10),metal),.17);
+    add(new THREE.Mesh(new THREE.CylinderGeometry(.15*scale,.18*scale,.36*scale,12),glass),.39);
+    add(new THREE.Mesh(new THREE.CylinderGeometry(.18*scale,.13*scale,.10*scale,10),metal),.62);
+    add(new THREE.Mesh(new THREE.CylinderGeometry(.09*scale,.14*scale,.12*scale,10),metal),.73);
+    add(new THREE.Mesh(new THREE.ConeGeometry(.15*scale,.12*scale,10),metal),.84);
+    [-1,1].forEach(side=>{
+        const rail=new THREE.Mesh(new THREE.BoxGeometry(.03*scale,.45*scale,.03*scale),metal);
+        rail.position.set(side*.20*scale,.40*scale,0);g.add(rail);
+    });
+    const handle=new THREE.Mesh(new THREE.TorusGeometry(.20*scale,.022*scale,6,16,Math.PI),metal);
+    handle.rotation.z=Math.PI;handle.position.y=.82*scale;g.add(handle);
+    const flame=new THREE.Mesh(new THREE.ConeGeometry(.05*scale,.14*scale,8),new THREE.MeshBasicMaterial({color:0xffb13b}));
+    flame.position.y=.38*scale;g.add(flame);
+    const light=new THREE.PointLight(0xffad52,1.45,7);light.position.y=.42*scale;g.add(light);
+    return g;
+}
+
+function createWalkInTent(){
+
+    const tent=
+        new THREE.Group();
+
+    const fabric=
+        new THREE.MeshStandardMaterial({
+            color:0x6f7655,
+            side:THREE.DoubleSide,
+            roughness:1
+        });
+
+    const darkFabric=
+        new THREE.MeshStandardMaterial({
+            color:0x50563e,
+            side:THREE.DoubleSide,
+            roughness:1
+        });
+
+    const woodMaterial=
+        new THREE.MeshStandardMaterial({
+            color:0x6e5130
+        });
+
+    const width=6;
+    const depth=7;
+    const height=4;
+
+    /* FLOOR */
+
+    const floor=
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                width,
+                .08,
+                depth
+            ),
+
+            new THREE.MeshStandardMaterial({
+                color:0x5a5039
+            })
+
+        );
+
+    floor.position.y=.04;
+
+    tent.add(floor);
+
+    /* SLOPED LEFT SIDE */
+
+    const roofLength=
+        Math.sqrt(
+            Math.pow(width/2,2)+
+            Math.pow(height,2)
+        );
+
+    const leftRoof=
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                .12,
+                roofLength,
+                depth
+            ),
+
+            fabric
+
+        );
+
+    leftRoof.position.set(
+        -width/4,
+        height/2,
+        0
+    );
+
+    leftRoof.rotation.z=
+        -Math.atan2(
+            width/2,
+            height
+        );
+
+    tent.add(leftRoof);
+
+    /* SLOPED RIGHT SIDE */
+
+    const rightRoof=
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                .12,
+                roofLength,
+                depth
+            ),
+
+            fabric
+
+        );
+
+    rightRoof.position.set(
+        width/4,
+        height/2,
+        0
+    );
+
+    rightRoof.rotation.z=
+        Math.atan2(
+            width/2,
+            height
+        );
+
+    tent.add(rightRoof);
+
+    /* BACK WALL ONLY */
+
+    const backShape=
+        new THREE.Shape();
+
+    backShape.moveTo(
+        -width/2,
+        0
+    );
+
+    backShape.lineTo(
+        width/2,
+        0
+    );
+
+    backShape.lineTo(
+        0,
+        height
+    );
+
+    backShape.lineTo(
+        -width/2,
+        0
+    );
+
+    const backWall=
+        new THREE.Mesh(
+
+            new THREE.ShapeGeometry(
+                backShape
+            ),
+
+            darkFabric
+
+        );
+
+    backWall.position.set(
+        0,
+        .05,
+        -depth/2+.03
+    );
+
+    tent.add(backWall);
+
+    /*
+       NO FRONT FLAPS.
+       NO FRONT TRIANGLE.
+       NO FRONT WALL.
+       FRONT IS COMPLETELY OPEN.
+    */
+
+    /* SUPPORT POLES */
+
+    const frontPole=
+        new THREE.Mesh(
+
+            new THREE.CylinderGeometry(
+                .06,
+                .06,
+                height,
+                8
+            ),
+
+            woodMaterial
+
+        );
+
+    frontPole.position.set(
+        0,
+        height/2,
+        depth/2-.08
+    );
+
+    tent.add(frontPole);
+
+    const backPole=
+        frontPole.clone();
+
+    backPole.position.z=
+        -depth/2+.08;
+
+    tent.add(backPole);
+
+    /* BEDROLL */
+
+    const bedroll=
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                1.8,
+                .18,
+                3
+            ),
+
+            new THREE.MeshStandardMaterial({
+                color:0x374c39
+            })
+
+        );
+
+    bedroll.position.set(
+        -1.5,
+        .14,
+        -.8
+    );
+
+    tent.add(bedroll);
+    game.bedroll=bedroll;
+
+    const pillow=
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                1.3,
+                .22,
+                .6
+            ),
+
+            new THREE.MeshStandardMaterial({
+                color:0xc8bea8
+            })
+
+        );
+
+    pillow.position.set(
+        -1.5,
+        .24,
+        -1.95
+    );
+
+    tent.add(pillow);
+
+    /* CRATE */
+
+    const crate=
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                1.25,
+                1,
+                1.2
+            ),
+
+            new THREE.MeshStandardMaterial({
+                color:0x7d542f
+            })
+
+        );
+
+    crate.position.set(
+        1.6,
+        .5,
+        -1.5
+    );
+
+    tent.add(crate);
+
+    /* LANTERN — matching frontier lantern resting correctly on its stand */
+    const lanternStandMat=new THREE.MeshStandardMaterial({color:0x6f4b2e,roughness:.9});
+    const lanternStandTop=new THREE.Mesh(new THREE.BoxGeometry(.72,.12,.58),lanternStandMat);
+    lanternStandTop.position.set(.9,.42,.3);
+    tent.add(lanternStandTop);
+    const lanternStandLeg=new THREE.Mesh(new THREE.BoxGeometry(.12,.42,.12),lanternStandMat);
+    lanternStandLeg.position.set(.9,.21,.3);
+    tent.add(lanternStandLeg);
+
+    const lantern=createFrontierLantern(.78);
+    lantern.position.set(.9,.49,.3);
+    tent.add(lantern);
+
+
+    /* PLACE TENT */
+
+    tent.position.set(
+        -3,
+        0,
+        0
+    );
+
+    scene.add(tent);
+
+    game.tent=
+        tent;
+
+    game.tentCrate=
+        crate;
+
+    /*
+       COLLISION:
+       ONLY BACK + SIDES.
+       NOTHING ACROSS THE FRONT.
+    */
+
+    const blockers=[];
+
+    for(let x=-2.5;x<=2.5;x+=1){
+
+        blockers.push([
+            -3+x,
+            -3.35
+        ]);
+
+    }
+
+    for(let z=-2.5;z<=2.5;z+=1){
+
+        blockers.push([
+            -5.85,
+            z
+        ]);
+
+    }
+
+    for(let z=-2.5;z<=2.5;z+=1){
+
+        blockers.push([
+            -.15,
+            z
+        ]);
+
+    }
+
+    blockers.forEach(
+        function(pos){
+
+            const blocker=
+                new THREE.Object3D();
+
+            blocker.position.set(
+                pos[0],
+                0,
+                pos[1]
+            );
+
+            blocker.userData
+                .collisionRadius=.4;
+
+            scene.add(blocker);
+
+            game.collisions.push(
+                blocker
+            );
+
+        }
+    );
+
+}
+
+
+
+/* ======================================================
+   CHUNKS — 0.962
+   The current world is the starting chunk.
+   More chunks can be added later using the same rules.
+====================================================== */
+const CHUNK_SIZE = 92;
+const WORLD_CHUNKS_X = 10;
+const WORLD_CHUNKS_Z = 10;
+const WORLD_MIN_CHUNK_X = -5;
+const WORLD_MAX_CHUNK_X = 4;
+const WORLD_MIN_CHUNK_Z = -5;
+const WORLD_MAX_CHUNK_Z = 4;
+const STARTING_CHUNK = { x:0, z:0 };
+const NATURAL_ENTITIES_PER_CHUNK = 1;
+const STARTING_HOME_SAFE_SIZE = 60; // only the starting chunk has this protected home area
+
+function chunkBounds(chunkX=0,chunkZ=0){
+    const cx=chunkX*CHUNK_SIZE;
+    const cz=chunkZ*CHUNK_SIZE;
+    const half=CHUNK_SIZE/2;
+    return {
+        minX:cx-half, maxX:cx+half,
+        minZ:cz-half, maxZ:cz+half,
+        centerX:cx, centerZ:cz
+    };
+}
+
+function isInsideStartingHomeSafeArea(x,z,radius=0){
+    const b=chunkBounds(STARTING_CHUNK.x,STARTING_CHUNK.z);
+    const safeHalf=STARTING_HOME_SAFE_SIZE/2;
+
+    // Whole animal body must remain outside the centered 60 x 60 square.
+    return (
+        x+radius>=b.centerX-safeHalf && x-radius<=b.centerX+safeHalf &&
+        z+radius>=b.centerZ-safeHalf && z-radius<=b.centerZ+safeHalf
+    );
+}
+
+/* ======================================================
+   WILDLIFE — 0.96
+   Rabbits and deer are ambient wildlife for now.
+   They cannot be hunted with current tools.
+====================================================== */
+
+function wildlifePositionClear(x,z,radius,chunkX=0,chunkZ=0){
+    const b=chunkBounds(chunkX,chunkZ);
+
+    if(x-radius<b.minX || x+radius>b.maxX || z-radius<b.minZ || z+radius>b.maxZ) return false;
+
+    // Only the starting chunk has the 60x60 no-wildlife home area.
+    if(chunkX===STARTING_CHUNK.x && chunkZ===STARTING_CHUNK.z &&
+       isInsideStartingHomeSafeArea(x,z,radius)) return false;
+
+    if(Math.hypot(x-player.position.x,z-player.position.z)<7) return false;
+
+    // Animals may never SPAWN inside trees, rocks, bushes, camp pieces or buildings.
+    for(const object of game.collisions){
+        if(!object || !object.position || !object.parent) continue;
+        const r=object.userData.collisionRadius || .7;
+        if(Math.hypot(x-object.position.x,z-object.position.z)<radius+r+.35) return false;
+    }
+
+    for(const animal of game.wildlife){
+        if(Math.hypot(x-animal.group.position.x,z-animal.group.position.z)<radius+animal.radius+.55) return false;
+    }
+    return true;
+}
+
+function makeRabbit(){
+    const group=new THREE.Group();
+
+    const fur=new THREE.MeshStandardMaterial({color:0x8b8174,roughness:.95});
+    const furLight=new THREE.MeshStandardMaterial({color:0xd5c9b8,roughness:.95});
+    const earInner=new THREE.MeshStandardMaterial({color:0xb98d86,roughness:1});
+    const dark=new THREE.MeshStandardMaterial({color:0x161412,roughness:.8});
+
+    // Body rig. Same visual body as before, now it can lean during a hop.
+    const bodyPivot=new THREE.Group();
+    bodyPivot.position.set(0,0,0);
+    group.add(bodyPivot);
+
+    const body=new THREE.Mesh(new THREE.SphereGeometry(.36,14,10),fur);
+    body.scale.set(1.05,.92,1.28);
+    body.position.set(0,.39,-.03);
+    bodyPivot.add(body);
+
+    const chest=new THREE.Mesh(new THREE.SphereGeometry(.27,12,9),furLight);
+    chest.scale.set(.85,1.05,.75);
+    chest.position.set(0,.43,.22);
+    bodyPivot.add(chest);
+
+    const headPivot=new THREE.Group();
+    headPivot.position.set(0,0,0);
+    bodyPivot.add(headPivot);
+
+    const head=new THREE.Mesh(new THREE.SphereGeometry(.255,14,10),fur);
+    head.scale.set(.92,1.0,.95);
+    head.position.set(0,.67,.32);
+    headPivot.add(head);
+
+    const muzzle=new THREE.Mesh(new THREE.SphereGeometry(.12,10,8),furLight);
+    muzzle.scale.set(1.05,.75,.85);
+    muzzle.position.set(0,.61,.53);
+    headPivot.add(muzzle);
+
+    [-.115,.115].forEach((x,i)=>{
+        const ear=new THREE.Mesh(new THREE.CapsuleGeometry(.065,.34,5,9),fur);
+        ear.position.set(x,.99,.29);
+        ear.rotation.z=i===0 ? -.10 : .10;
+        headPivot.add(ear);
+
+        const inner=new THREE.Mesh(new THREE.CapsuleGeometry(.031,.25,4,8),earInner);
+        inner.position.set(x,.995,.347);
+        inner.rotation.z=i===0 ? -.10 : .10;
+        headPivot.add(inner);
+    });
+
+    [-.155,.155].forEach(x=>{
+        const eye=new THREE.Mesh(new THREE.SphereGeometry(.035,8,7),dark);
+        eye.position.set(x,.72,.49);
+        headPivot.add(eye);
+    });
+
+    const nose=new THREE.Mesh(new THREE.SphereGeometry(.042,8,6),dark);
+    nose.scale.set(1,.75,.75);
+    nose.position.set(0,.625,.655);
+    headPivot.add(nose);
+
+    // Rear feet are unchanged visually, but each is now on a pivot.
+    const backFeet=[];
+    [-.20,.20].forEach(x=>{
+        const pivot=new THREE.Group();
+        pivot.position.set(x,.15,-.28);
+        group.add(pivot);
+
+        const foot=new THREE.Mesh(new THREE.SphereGeometry(.13,9,7),fur);
+        foot.scale.set(1.2,.55,1.55);
+        pivot.add(foot);
+        backFeet.push(pivot);
+    });
+
+    // Front paws are unchanged visually, now articulated.
+    const frontPaws=[];
+    [-.105,.105].forEach(x=>{
+        const pivot=new THREE.Group();
+        pivot.position.set(x,.13,.29);
+        group.add(pivot);
+
+        const paw=new THREE.Mesh(new THREE.SphereGeometry(.075,8,6),furLight);
+        paw.scale.set(.8,.55,1.25);
+        pivot.add(paw);
+        frontPaws.push(pivot);
+    });
+
+    const tail=new THREE.Mesh(new THREE.SphereGeometry(.145,10,8),furLight);
+    tail.position.set(0,.39,-.48);
+    bodyPivot.add(tail);
+
+    group.userData.rabbitRig={
+        bodyPivot,
+        headPivot,
+        backFeet,
+        frontPaws
+    };
+
+    return group;
+}
+
+function makeDeer(){
+    const group=new THREE.Group();
+
+    const coat=new THREE.MeshStandardMaterial({color:0x95643f,roughness:.96});
+    const legCoat=new THREE.MeshStandardMaterial({color:0x805536,roughness:.98});
+    const cream=new THREE.MeshStandardMaterial({color:0xd7c09b,roughness:1});
+    const black=new THREE.MeshStandardMaterial({color:0x17130f,roughness:.85});
+    const antlerMat=new THREE.MeshStandardMaterial({color:0x73583b,roughness:1});
+
+    // Body
+    const body=new THREE.Mesh(new THREE.SphereGeometry(.60,30,22),coat);
+    body.scale.set(.75,.66,1.46);
+    body.position.set(0,1.03,-.12);
+    group.add(body);
+
+    const chest=new THREE.Mesh(new THREE.SphereGeometry(.42,28,20),coat);
+    chest.scale.set(.80,.92,.80);
+    chest.position.set(0,1.08,.47);
+    group.add(chest);
+
+    const rump=new THREE.Mesh(new THREE.SphereGeometry(.41,26,18),coat);
+    rump.scale.set(.84,.78,.80);
+    rump.position.set(0,1.06,-.61);
+    group.add(rump);
+
+    // IMPORTANT: forward is +Z. Positive X rotation makes the neck lean FORWARD.
+    const neckPivot=new THREE.Group();
+    neckPivot.position.set(0,1.13,.47);
+    neckPivot.rotation.x=.48;
+    group.add(neckPivot);
+
+    // One clean tapered cylinder, buried into chest at bottom and skull at top.
+    const neck=new THREE.Mesh(
+        new THREE.CylinderGeometry(.19,.31,.72,24,1,false),
+        coat
+    );
+    neck.position.set(0,.28,0);
+    neckPivot.add(neck);
+
+    // Everything on the skull is grouped together so the head/antlers stay attached.
+    const headGroup=new THREE.Group();
+    headGroup.position.set(0,.62,0);
+    neckPivot.add(headGroup);
+
+    const head=new THREE.Mesh(new THREE.SphereGeometry(.255,28,20),coat);
+    head.scale.set(.90,.80,1.24);
+    head.position.set(0,0,.08);
+    headGroup.add(head);
+
+    const face=new THREE.Mesh(new THREE.SphereGeometry(.17,24,18),coat);
+    face.scale.set(.90,.72,1.20);
+    face.position.set(0,-.04,.28);
+    headGroup.add(face);
+
+    const muzzle=new THREE.Mesh(new THREE.SphereGeometry(.125,22,16),cream);
+    muzzle.scale.set(.88,.62,1.52);
+    muzzle.position.set(0,-.09,.47);
+    headGroup.add(muzzle);
+
+    const nose=new THREE.Mesh(new THREE.SphereGeometry(.052,16,12),black);
+    nose.scale.set(1.18,.72,.84);
+    nose.position.set(0,-.09,.635);
+    headGroup.add(nose);
+
+    [-1,1].forEach(side=>{
+        const eye=new THREE.Mesh(new THREE.SphereGeometry(.027,12,8),black);
+        eye.position.set(side*.18,.06,.20);
+        headGroup.add(eye);
+    });
+
+    // Broad sideways deer ears
+    [-1,1].forEach(side=>{
+        const earPivot=new THREE.Group();
+        earPivot.position.set(side*.15,.17,.06);
+        earPivot.rotation.z=side<0 ? .98 : -.98;
+        earPivot.rotation.x=-.10;
+        headGroup.add(earPivot);
+
+        const ear=new THREE.Mesh(new THREE.SphereGeometry(.12,20,14),coat);
+        ear.scale.set(.40,1.48,.43);
+        ear.position.y=.11;
+        earPivot.add(ear);
+
+        const inner=new THREE.Mesh(new THREE.SphereGeometry(.073,18,12),cream);
+        inner.scale.set(.32,1.28,.21);
+        inner.position.set(0,.11,.035);
+        earPivot.add(inner);
+    });
+
+    // Continuous antlers rooted inside the skull.
+    function antlerTube(parent,points,radius){
+        const curve=new THREE.CatmullRomCurve3(
+            points.map(p=>new THREE.Vector3(p[0],p[1],p[2]))
+        );
+        const tube=new THREE.Mesh(
+            new THREE.TubeGeometry(curve,20,radius,8,false),
+            antlerMat
+        );
+        parent.add(tube);
+    }
+
+    [-1,1].forEach(side=>{
+        antlerTube(headGroup,[
+            [side*.085,.12,.04],
+            [side*.10,.22,.02],
+            [side*.13,.34,-.01],
+            [side*.18,.45,-.07],
+            [side*.24,.53,-.15]
+        ],.032);
+
+        antlerTube(headGroup,[
+            [side*.125,.30,.00],
+            [side*.17,.39,.07],
+            [side*.20,.48,.12]
+        ],.024);
+
+        antlerTube(headGroup,[
+            [side*.175,.42,-.06],
+            [side*.23,.50,-.01],
+            [side*.27,.58,.02]
+        ],.022);
+
+        antlerTube(headGroup,[
+            [side*.225,.51,-.14],
+            [side*.28,.57,-.12],
+            [side*.32,.63,-.13]
+        ],.020);
+    });
+
+    // Tail
+    const tailPivot=new THREE.Group();
+    tailPivot.position.set(0,1.16,-.84);
+    tailPivot.rotation.x=-.70;
+    group.add(tailPivot);
+
+    const tail=new THREE.Mesh(new THREE.SphereGeometry(.13,18,14),cream);
+    tail.scale.set(.70,1.35,.68);
+    tail.position.y=-.08;
+    tailPivot.add(tail);
+
+    // Legs
+    function makeLeg(x,z){
+        const pivot=new THREE.Group();
+        pivot.position.set(x,.90,z);
+        group.add(pivot);
+
+        const upper=new THREE.Mesh(new THREE.CylinderGeometry(.070,.090,.46,16),legCoat);
+        upper.position.y=-.21;
+        pivot.add(upper);
+
+        const lowerPivot=new THREE.Group();
+        lowerPivot.position.set(0,-.42,0);
+        pivot.add(lowerPivot);
+
+        const lower=new THREE.Mesh(new THREE.CylinderGeometry(.041,.055,.45,16),legCoat);
+        lower.position.y=-.21;
+        lowerPivot.add(lower);
+
+        const hoof=new THREE.Mesh(new THREE.SphereGeometry(.065,14,10),black);
+        hoof.scale.set(.72,.42,1.12);
+        hoof.position.set(0,-.45,.035);
+        lowerPivot.add(hoof);
+
+        return {pivot,lowerPivot};
+    }
+
+    const frontLeft=makeLeg(-.22,.43);
+    const frontRight=makeLeg(.22,.43);
+    const backLeft=makeLeg(-.22,-.50);
+    const backRight=makeLeg(.22,-.50);
+
+    group.userData.deerRig={
+        neckPivot,tailPivot,
+        frontLeft,frontRight,backLeft,backRight
+    };
+
+    return group;
+}
+
+function spawnWildlife(kind,count,chunkX=0,chunkZ=0){
+    const b=chunkBounds(chunkX,chunkZ);
+
+    for(let n=0;n<count;n++){
+        let x=b.centerX,z=b.centerZ,tries=0;
+        const radius=kind==="deer" ? .9 : .42;
+        let clear=false;
+
+        while(tries<220){
+            x=b.minX+radius+1+Math.random()*(CHUNK_SIZE-radius*2-2);
+            z=b.minZ+radius+1+Math.random()*(CHUNK_SIZE-radius*2-2);
+            clear=wildlifePositionClear(x,z,radius,chunkX,chunkZ);
+            if(clear) break;
+            tries++;
+        }
+
+        if(!clear) continue;
+
+        const group=kind==="deer" ? makeDeer() : makeRabbit();
+        group.position.set(x,0,z);
+        group.rotation.y=Math.random()*Math.PI*2;
+        scene.add(group);
+
+        game.wildlife.push({
+            kind,
+            group,
+            radius,
+            chunkX,
+            chunkZ,
+            state:"wander",
+            direction:group.rotation.y,
+            targetDirection:group.rotation.y,
+            stateTimer:2+Math.random()*5,
+            speed:kind==="deer" ? .72 : .55,
+            fleeSpeed:kind==="deer" ? 5.2 : 4.3,
+            fleeDistance:kind==="deer" ? 8.5 : 4.5,
+            calmDistance:kind==="deer" ? 15 : 9,
+            hopPhase:Math.random()*Math.PI*2,
+            fleeSteerTimer:0,
+            lastPlayerDistance:999
+        });
+    }
+}
+
+function wildlifeCanMove(animal,nx,nz,allowHomeZone=false,ignoreNaturalObstacles=false){
+    const b=chunkBounds(animal.chunkX??0,animal.chunkZ??0);
+    if(nx-animal.radius<b.minX || nx+animal.radius>b.maxX ||
+       nz-animal.radius<b.minZ || nz+animal.radius>b.maxZ) return false;
+
+    if(!allowHomeZone &&
+       (animal.chunkX??0)===STARTING_CHUNK.x &&
+       (animal.chunkZ??0)===STARTING_CHUNK.z &&
+       isInsideStartingHomeSafeArea(nx,nz,animal.radius)) return false;
+
+    if(!ignoreNaturalObstacles){
+        for(const object of game.collisions){
+            if(!object || !object.position || !object.parent) continue;
+
+            // During normal movement, wildlife avoids everything.
+            // During an emergency escape, natural world obstacles may be ignored,
+            // but buildings/camp objects remain solid.
+            const isNatural =
+                object.userData?.resourceType ||
+                object.userData?.naturalObstacle ||
+                object.userData?.type==="tree" ||
+                object.userData?.type==="rock" ||
+                object.userData?.type==="bush";
+
+            const r=object.userData.collisionRadius || .7;
+            if(Math.hypot(nx-object.position.x,nz-object.position.z)<animal.radius+r+.06){
+                return false;
+            }
+        }
+    }else{
+        // Even in emergency mode, keep constructed/building collisions solid.
+        for(const object of game.collisions){
+            if(!object || !object.position || !object.parent) continue;
+            const isNatural =
+                object.userData?.resourceType ||
+                object.userData?.naturalObstacle ||
+                object.userData?.type==="tree" ||
+                object.userData?.type==="rock" ||
+                object.userData?.type==="bush";
+            if(isNatural) continue;
+
+            const r=object.userData.collisionRadius || .7;
+            if(Math.hypot(nx-object.position.x,nz-object.position.z)<animal.radius+r+.06){
+                return false;
+            }
+        }
+    }
+
+    if(animal.state!=="flee"){
+        for(const other of game.wildlife){
+            if(other===animal) continue;
+            if(Math.hypot(nx-other.group.position.x,nz-other.group.position.z)<animal.radius+other.radius+.04){
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+
+function animateDeer(animal,delta,speed){
+    const rig=animal.group.userData.deerRig;
+    if(!rig) return;
+
+    // Reset smoothly while standing.
+    if(speed<=0){
+        const relax=Math.min(1,delta*6);
+        for(const leg of [rig.frontLeft,rig.frontRight,rig.backLeft,rig.backRight]){
+            leg.pivot.rotation.x += (0-leg.pivot.rotation.x)*relax;
+            leg.lowerPivot.rotation.x += (0-leg.lowerPivot.rotation.x)*relax;
+        }
+        rig.neckPivot.rotation.z += (0-rig.neckPivot.rotation.z)*relax;
+        rig.tailPivot.rotation.x += (-.75-rig.tailPivot.rotation.x)*relax;
+        return;
+    }
+
+    const running=animal.state==="flee";
+    const cycleRate=running ? 10.5 : 5.2;
+    const swing=running ? .68 : .38;
+    animal.walkCycle=(animal.walkCycle||0)+delta*cycleRate;
+
+    const a=Math.sin(animal.walkCycle)*swing;
+    const b=Math.sin(animal.walkCycle+Math.PI)*swing;
+
+    // Diagonal pairs alternate like a natural quadruped gait.
+    rig.frontLeft.pivot.rotation.x=a;
+    rig.backRight.pivot.rotation.x=a;
+    rig.frontRight.pivot.rotation.x=b;
+    rig.backLeft.pivot.rotation.x=b;
+
+    // Knees bend on the backward portion of the stride.
+    rig.frontLeft.lowerPivot.rotation.x=Math.max(0,-a)*.55;
+    rig.backRight.lowerPivot.rotation.x=Math.max(0,-a)*.55;
+    rig.frontRight.lowerPivot.rotation.x=Math.max(0,-b)*.55;
+    rig.backLeft.lowerPivot.rotation.x=Math.max(0,-b)*.55;
+
+    // Subtle head and tail movement makes the walk feel alive.
+    rig.neckPivot.rotation.z=Math.sin(animal.walkCycle*.5)*.025;
+    rig.tailPivot.rotation.x=-.75+(running?.18:.07)*Math.sin(animal.walkCycle);
+}
+
+
+function chooseWildlifeEscapeDirection(animal){
+    const g=animal.group;
+    const dx=g.position.x-player.position.x;
+    const dz=g.position.z-player.position.z;
+    const direct=Math.atan2(dx,dz);
+
+    const offsets=[0,.18,-.18,.36,-.36,.55,-.55,.78,-.78,1.02,-1.02,1.28,-1.28,1.52,-1.52,Math.PI];
+    const step=animal.kind==="deer" ? .72 : .52;
+
+    // 1) Preferred: obey home zone and all obstacles.
+    for(const off of offsets){
+        const dir=direct+off;
+        const nx=g.position.x+Math.sin(dir)*step;
+        const nz=g.position.z+Math.cos(dir)*step;
+        if(wildlifeCanMove(animal,nx,nz,false,false)){
+            animal.fleeThroughHomeZone=false;
+            animal.fleeThroughNaturalObstacle=false;
+            return dir;
+        }
+    }
+
+    // 2) If the protected zone is what traps them, allow crossing it.
+    for(const off of offsets){
+        const dir=direct+off;
+        const nx=g.position.x+Math.sin(dir)*step;
+        const nz=g.position.z+Math.cos(dir)*step;
+        if(wildlifeCanMove(animal,nx,nz,true,false)){
+            animal.fleeThroughHomeZone=true;
+            animal.fleeThroughNaturalObstacle=false;
+            return dir;
+        }
+    }
+
+    // 3) Last escape fallback: pass through trees, rocks, bushes, etc.
+    // Buildings and the map edge still remain solid.
+    for(const off of offsets){
+        const dir=direct+off;
+        const nx=g.position.x+Math.sin(dir)*step;
+        const nz=g.position.z+Math.cos(dir)*step;
+        if(wildlifeCanMove(animal,nx,nz,true,true)){
+            animal.fleeThroughHomeZone=isInsideStartingHomeSafeArea(nx,nz,animal.radius);
+            animal.fleeThroughNaturalObstacle=true;
+            return dir;
+        }
+    }
+
+    // Do not spin/jitter if completely boxed in.
+    animal.fleeThroughNaturalObstacle=false;
+    return direct;
+}
+
+function steerWildlifeOutOfHomeZone(animal){
+    if(!isInsideStartingHomeSafeArea(animal.group.position.x,animal.group.position.z,animal.radius)){
+        animal.fleeThroughHomeZone=false;
+        return;
+    }
+
+    const b=chunkBounds(STARTING_CHUNK.x,STARTING_CHUNK.z);
+    const safeHalf=STARTING_HOME_SAFE_SIZE/2;
+    const x=animal.group.position.x-b.centerX;
+    const z=animal.group.position.z-b.centerZ;
+
+    // Head toward whichever edge of the protected square is nearest.
+    const distRight=safeHalf-x;
+    const distLeft=safeHalf+x;
+    const distFront=safeHalf-z;
+    const distBack=safeHalf+z;
+    const smallest=Math.min(distRight,distLeft,distFront,distBack);
+
+    if(smallest===distRight) animal.direction=Math.PI/2;
+    else if(smallest===distLeft) animal.direction=-Math.PI/2;
+    else if(smallest===distFront) animal.direction=0;
+    else animal.direction=Math.PI;
+}
+
+
+function animateRabbit(animal,delta,speed){
+    const rig=animal.group.userData.rabbitRig;
+    if(!rig) return;
+
+    const moving=speed>0;
+    const settle=Math.max(0,1-delta*10);
+
+    if(!moving){
+        rig.bodyPivot.rotation.x*=settle;
+        rig.headPivot.rotation.x*=settle;
+        rig.bodyPivot.position.y*=settle;
+        rig.bodyPivot.position.z*=settle;
+        for(const p of rig.backFeet){
+            p.rotation.x*=settle;
+            p.position.z*=settle;
+        }
+        for(const p of rig.frontPaws){
+            p.rotation.x*=settle;
+            p.position.z*=settle;
+        }
+        animal.group.position.y*=settle;
+        animal.rabbitStrideBoost=0;
+        return;
+    }
+
+    const fleeing=animal.state==="flee";
+    const cycleRate=fleeing ? 9.4 : 5.2;
+    animal.rabbitHopPhase=(animal.rabbitHopPhase||0)+delta*cycleRate;
+
+    // 0..1 cycle makes it easier to shape a believable rabbit gait.
+    const cycle=(animal.rabbitHopPhase/(Math.PI*2))%1;
+
+    // Phase layout:
+    // 0.00-0.18 crouch/load
+    // 0.18-0.42 launch
+    // 0.42-0.68 airborne/tuck
+    // 0.68-0.84 forepaw landing
+    // 0.84-1.00 rear feet catch up/compress
+    function smoothstep(a,b,x){
+        const t=Math.max(0,Math.min(1,(x-a)/(b-a)));
+        return t*t*(3-2*t);
+    }
+
+    const crouch =
+        cycle<.18 ? smoothstep(0,.18,cycle) :
+        cycle>.84 ? 1-smoothstep(.84,1,cycle) : 0;
+
+    const launch = cycle>=.18 && cycle<.42 ? smoothstep(.18,.42,cycle) : 0;
+    const airborne = cycle>=.30 && cycle<.72
+        ? Math.sin(((cycle-.30)/.42)*Math.PI)
+        : 0;
+    const landing = cycle>=.66 && cycle<.88 ? smoothstep(.66,.88,cycle) : 0;
+
+    // Vertical movement is now an actual hop arc rather than simple sine bobbing.
+    const hopHeight=fleeing?.26:.13;
+    animal.group.position.y=airborne*hopHeight;
+
+    // Subtle forward body travel within each stride prevents the rabbit from
+    // looking like it is hopping in place while sliding across the ground.
+    rig.bodyPivot.position.z =
+        launch*(fleeing?.075:.045) -
+        landing*(fleeing?.028:.018);
+
+    rig.bodyPivot.position.y = -crouch*(fleeing?.035:.025);
+
+    // Body stretches forward in launch, levels in air, then tips slightly back
+    // as the forepaws reach for the ground.
+    rig.bodyPivot.rotation.x =
+        -.10
+        - launch*(fleeing?.25:.18)
+        + airborne*.10
+        + landing*.18
+        + crouch*.08;
+
+    // Head compensates for the body so it stays naturally aimed forward.
+    rig.headPivot.rotation.x =
+        -rig.bodyPivot.rotation.x*.45 - airborne*.035;
+
+    // Rear feet: compress beneath body, extend hard behind during launch,
+    // then tuck forward while airborne.
+    let rearRot=0, rearZ=0;
+    if(cycle<.18){
+        rearRot=.34*crouch;
+        rearZ=.045*crouch;
+    }else if(cycle<.48){
+        rearRot=-.78*launch;
+        rearZ=-.085*launch;
+    }else if(cycle<.78){
+        const tuck=smoothstep(.48,.78,cycle);
+        rearRot=-.32 + tuck*.60;
+        rearZ=-.04 + tuck*.075;
+    }else{
+        const catchup=smoothstep(.78,1,cycle);
+        rearRot=.28*(1-catchup);
+        rearZ=.04*(1-catchup);
+    }
+
+    for(const p of rig.backFeet){
+        p.rotation.x=rearRot;
+        p.position.z=rearZ;
+    }
+
+    // Forepaws stay tucked during takeoff, reach ahead while airborne,
+    // contact first, then slide back under the chest.
+    let frontRot=0, frontZ=0;
+    if(cycle<.38){
+        const tuck=smoothstep(0,.38,cycle);
+        frontRot=-.22*tuck;
+        frontZ=-.02*tuck;
+    }else if(cycle<.72){
+        const reach=smoothstep(.38,.72,cycle);
+        frontRot=-.22 + reach*.72;
+        frontZ=-.02 + reach*.075;
+    }else{
+        const plant=smoothstep(.72,1,cycle);
+        frontRot=.50*(1-plant);
+        frontZ=.055*(1-plant);
+    }
+
+    for(const p of rig.frontPaws){
+        p.rotation.x=frontRot;
+        p.position.z=frontZ;
+    }
+
+    // Small speed pulse tied to the launch phase makes forward movement feel
+    // propelled by each hop instead of mechanically constant.
+    animal.rabbitStrideBoost=(launch*.18 + airborne*.08) * (fleeing?1.25:1);
+}
+
+let activeWildlifeCache=[];
+let activeWildlifeCacheX=Infinity;
+let activeWildlifeCacheZ=Infinity;
+let activeWildlifeCacheAt=0;
+let activeWildlifeCacheLength=-1;
+
+function refreshActiveWildlifeCache(force=false){
+    const now=performance.now();
+    const movedX=Math.abs(player.position.x-activeWildlifeCacheX);
+    const movedZ=Math.abs(player.position.z-activeWildlifeCacheZ);
+
+    if(
+        !force &&
+        game.wildlife.length===activeWildlifeCacheLength &&
+        movedX<8 &&
+        movedZ<8 &&
+        now-activeWildlifeCacheAt<500
+    ) return;
+
+    activeWildlifeCacheX=player.position.x;
+    activeWildlifeCacheZ=player.position.z;
+    activeWildlifeCacheAt=now;
+    activeWildlifeCacheLength=game.wildlife.length;
+    activeWildlifeCache.length=0;
+
+    // Same 150-unit active distance the game already used.
+    const range=150;
+    const rangeSq=range*range;
+    for(const animal of game.wildlife){
+        const dx=animal.group.position.x-player.position.x;
+        const dz=animal.group.position.z-player.position.z;
+        if(dx*dx+dz*dz<=rangeSq){
+            activeWildlifeCache.push(animal);
+        }
+    }
+}
+
+function updateWildlife(delta){
+    if(!game.running || game.mode!=="explore") return;
+
+    refreshActiveWildlifeCache();
+
+    for(const animal of activeWildlifeCache){
+        const g=animal.group;
+        const dx=g.position.x-player.position.x;
+        const dz=g.position.z-player.position.z;
+        const playerDistance=Math.hypot(dx,dz);
+
+        animal.fleeSteerTimer=Math.max(0,(animal.fleeSteerTimer||0)-delta);
+
+        // Do not constantly recalculate the animal's direction just because the
+        // player is walking beside it. That was the main cause of the jitter/glitch.
+        if(playerDistance<animal.fleeDistance){
+            const justStartedFleeing=animal.state!=="flee";
+            animal.state="flee";
+
+            // Pick a new escape heading only when fleeing first starts, when the
+            // player gets extremely close, or after a short steering cooldown.
+            const emergencyDistance=animal.kind==="deer" ? 2.2 : 1.35;
+            const playerClosingIn=playerDistance < (animal.lastPlayerDistance||999)-.08;
+
+            if(
+                justStartedFleeing ||
+                playerDistance<emergencyDistance ||
+                (animal.fleeSteerTimer<=0 && playerClosingIn)
+            ){
+                animal.direction=chooseWildlifeEscapeDirection(animal);
+                animal.fleeSteerTimer=playerDistance<emergencyDistance ? .18 : .55;
+            }
+
+            animal.stateTimer=1.0;
+        }else if(animal.state==="flee" && playerDistance>animal.calmDistance){
+            // If an animal had to cross the protected zone, leave the zone before relaxing.
+            if(isInsideStartingHomeSafeArea(g.position.x,g.position.z,animal.radius)){
+                steerWildlifeOutOfHomeZone(animal);
+                animal.state="flee";
+                animal.fleeThroughHomeZone=true;
+                animal.stateTimer=.6;
+                animal.fleeSteerTimer=.35;
+            }else{
+                animal.state="wander";
+                animal.fleeThroughHomeZone=false;
+                animal.fleeThroughNaturalObstacle=false;
+                animal.stateTimer=1+Math.random()*3;
+                animal.fleeSteerTimer=0;
+            }
+        }
+
+        animal.lastPlayerDistance=playerDistance;
+
+        animal.stateTimer-=delta;
+
+        if(animal.state!=="flee" && animal.stateTimer<=0){
+            if(Math.random()<.34){
+                animal.state="rest";
+                animal.stateTimer=1.5+Math.random()*3.5;
+            }else{
+                animal.state="wander";
+                animal.targetDirection=animal.direction+(Math.random()-.5)*2.4;
+                animal.direction=animal.targetDirection;
+                animal.stateTimer=2+Math.random()*5;
+            }
+        }
+
+        let speed=0;
+        if(animal.state==="wander") speed=animal.speed;
+        if(animal.state==="flee") speed=animal.fleeSpeed;
+
+        // Rabbit travel speed pulses with the push-off portion of the hop so the
+        // feet and forward movement feel connected rather than like sliding.
+        let travelSpeed=speed;
+        if(animal.kind==="rabbit" && speed>0){
+            travelSpeed=speed*(.90+(animal.rabbitStrideBoost||0));
+        }
+
+        if(speed>0){
+            const nx=g.position.x+Math.sin(animal.direction)*travelSpeed*delta;
+            const nz=g.position.z+Math.cos(animal.direction)*travelSpeed*delta;
+
+            const allowHomeZone=animal.state==="flee" && !!animal.fleeThroughHomeZone;
+            const ignoreNaturalObstacles=animal.state==="flee" && !!animal.fleeThroughNaturalObstacle;
+
+            if(wildlifeCanMove(animal,nx,nz,allowHomeZone,ignoreNaturalObstacles)){
+                g.position.x=nx;
+                g.position.z=nz;
+            }else if(animal.state==="flee"){
+                // If blocked, choose a new route once, then commit to it briefly
+                // instead of rapidly bouncing between headings.
+                if(animal.fleeSteerTimer<=0){
+                    animal.direction=chooseWildlifeEscapeDirection(animal);
+                    animal.fleeSteerTimer=.35;
+                }
+
+                const retryX=g.position.x+Math.sin(animal.direction)*travelSpeed*delta;
+                const retryZ=g.position.z+Math.cos(animal.direction)*travelSpeed*delta;
+                if(wildlifeCanMove(animal,retryX,retryZ,!!animal.fleeThroughHomeZone,!!animal.fleeThroughNaturalObstacle)){
+                    g.position.x=retryX;
+                    g.position.z=retryZ;
+                }
+            }else{
+                animal.direction+=Math.PI*.45+(Math.random()-.5)*.7;
+                animal.stateTimer=.6;
+            }
+
+            // As soon as a temporary safe-zone crossing is no longer necessary,
+            // steer out and restore the normal no-wildlife rule.
+            if(animal.fleeThroughHomeZone && isInsideStartingHomeSafeArea(g.position.x,g.position.z,animal.radius)){
+                steerWildlifeOutOfHomeZone(animal);
+            }else if(animal.fleeThroughHomeZone && !isInsideStartingHomeSafeArea(g.position.x,g.position.z,animal.radius)){
+                animal.fleeThroughHomeZone=false;
+            }
+
+            // Emergency obstacle-phasing is only for getting unstuck.
+            // Re-test the immediate route normally and turn it off as soon as possible.
+            if(animal.fleeThroughNaturalObstacle){
+                const testX=g.position.x+Math.sin(animal.direction)*.55;
+                const testZ=g.position.z+Math.cos(animal.direction)*.55;
+                if(wildlifeCanMove(animal,testX,testZ,!!animal.fleeThroughHomeZone,false)){
+                    animal.fleeThroughNaturalObstacle=false;
+                }
+            }
+
+            g.rotation.y=animal.direction;
+
+            // Rabbits now have an actual hopping gait; deer keep their articulated walk/run.
+            animal.hopPhase+=delta*(animal.kind==="deer" ? (animal.state==="flee"?9:4) : 1);
+
+            if(animal.kind==="rabbit"){
+                animateRabbit(animal,delta,speed);
+            }else{
+                g.position.y=Math.max(0,Math.sin(animal.hopPhase))*(animal.state==="flee"?.035:.012);
+                animateDeer(animal,delta,speed);
+            }
+        }else{
+            g.position.y=0;
+            if(animal.kind==="rabbit") animateRabbit(animal,delta,0);
+            if(animal.kind==="deer") animateDeer(animal,delta,0);
+        }
+    }
+}
+
+function createWildlife(){
+    // Exactly ONE animal per chunk.
+    // Rabbits remain more common: roughly 2 rabbits for every 1 deer.
+    for(let cx=WORLD_MIN_CHUNK_X;cx<=WORLD_MAX_CHUNK_X;cx++){
+        for(let cz=WORLD_MIN_CHUNK_Z;cz<=WORLD_MAX_CHUNK_Z;cz++){
+            const pattern=Math.abs(cx*11+cz*7)%3;
+            spawnWildlife(pattern===0 ? "deer" : "rabbit",1,cx,cz);
+        }
+    }
+}
+
+/* CAMP */
+
+function createCamp(){
+
+    const clearing=
+        new THREE.Mesh(
+
+            new THREE.CircleGeometry(
+                14,
+                48
+            ),
+
+            new THREE.MeshStandardMaterial({
+                color:0x887550
+            })
+
+        );
+
+    clearing.rotation.x=
+        -Math.PI/2;
+
+    clearing.position.y=.015;
+
+    scene.add(clearing);
+
+    createWalkInTent();
+
+    const fire=
+        new THREE.Group();
+
+    for(let i=0;i<8;i++){
+
+        const stone=
+            new THREE.Mesh(
+
+                new THREE.SphereGeometry(
+                    .23,
+                    8,
+                    8
+                ),
+
+                new THREE.MeshStandardMaterial({
+                    color:0x696763
+                })
+
+            );
+
+        const angle=
+            i/8*Math.PI*2;
+
+        stone.position.set(
+            Math.cos(angle)*.65,
+            .2,
+            Math.sin(angle)*.65
+        );
+
+        fire.add(stone);
+
+    }
+
+    const flame=
+        new THREE.Mesh(
+
+            new THREE.ConeGeometry(
+                .35,
+                .9,
+                7
+            ),
+
+            new THREE.MeshStandardMaterial({
+                color:0xff8a22,
+                emissive:0xff4200,
+                emissiveIntensity:2
+            })
+
+        );
+
+    flame.position.y=.6;
+
+    fire.add(flame);
+
+    const light=
+        new THREE.PointLight(
+            0xff6d20,
+            2.5,
+            12
+        );
+
+    light.position.y=1;
+
+    fire.add(light);
+
+    fire.position.set(
+        2,
+        0,
+        2
+    );
+
+    scene.add(fire);
+    game.campfire=fire;
+
+}
+
+createCamp();
+
+/* TREES */
+
+/*
+   FRONTIER 1.000 RENDER CORE
+   Repeated natural objects share their geometry/material resources. Every
+   tree, rock and bush is still an individual world object with the same
+   position, interaction, harvesting and regrowth behavior.
+*/
+const NATURAL_ASSETS={
+    treeTrunkGeometry:new THREE.CylinderGeometry(.4,.56,3.6,8),
+    treeTrunkMaterial:new THREE.MeshStandardMaterial({color:0x684426}),
+    treeLowerGeometry:new THREE.ConeGeometry(2.2,3.6,9),
+    treeUpperGeometry:new THREE.ConeGeometry(1.6,2.8,9),
+    treeLeafMaterial:new THREE.MeshStandardMaterial({color:0x315f32}),
+
+    rockGeometry:new THREE.DodecahedronGeometry(1,0),
+    rockMaterial:new THREE.MeshStandardMaterial({color:0x777b76}),
+
+    bushLargeGeometry:new THREE.SphereGeometry(.72,10,8),
+    bushSmallGeometry:new THREE.SphereGeometry(.52,10,8),
+    bushLeafMaterial:new THREE.MeshStandardMaterial({color:0x315d31,roughness:1}),
+    berryGeometry:new THREE.SphereGeometry(.13,10,8),
+    berryMaterial:new THREE.MeshStandardMaterial({
+        color:0x3556c8,
+        roughness:.45,
+        emissive:0x101842,
+        emissiveIntensity:.18
+    })
+};
+
+function freezeStaticObject(root){
+    root.traverse(obj=>{
+        if(obj.updateMatrix) obj.updateMatrix();
+        obj.matrixAutoUpdate=false;
+    });
+}
+
+function createTree(x,z){
+
+    const tree=
+        new THREE.Group();
+
+    const trunk=
+        new THREE.Mesh(
+
+            NATURAL_ASSETS.treeTrunkGeometry,
+            NATURAL_ASSETS.treeTrunkMaterial
+
+        );
+
+    trunk.position.y=1.8;
+
+    tree.add(trunk);
+
+    const lower=
+        new THREE.Mesh(
+            NATURAL_ASSETS.treeLowerGeometry,
+            NATURAL_ASSETS.treeLeafMaterial
+        );
+
+    lower.position.y=4.3;
+    lower.userData.canopyPart="lower";
+    lower.userData.tree=tree;
+
+    tree.add(lower);
+
+    const upper=
+        new THREE.Mesh(
+            NATURAL_ASSETS.treeUpperGeometry,
+            NATURAL_ASSETS.treeLeafMaterial
+        );
+
+    upper.position.y=5.7;
+    upper.userData.canopyPart="upper";
+    upper.userData.tree=tree;
+
+    tree.add(upper);
+
+    tree.position.set(
+        x,
+        0,
+        z
+    );
+
+    tree.userData={
+        resource:true,
+        type:"wood",
+        health:3,
+        collisionRadius:.8,
+        lowerCanopy:lower,
+        upperCanopy:upper,
+        canopyRegrowQueue:[]
+    };
+
+    scene.add(tree);
+
+    game.resources.push(tree);
+    game.collisions.push(tree);
+
+    freezeStaticObject(tree);
+    registerResourceSpatial(tree);
+    return tree;
+}
+
+function createRock(x,z){
+
+    const rock=
+        new THREE.Mesh(
+            NATURAL_ASSETS.rockGeometry,
+            NATURAL_ASSETS.rockMaterial
+        );
+
+    const rockScale=random(.7,1.2);
+    rock.scale.setScalar(rockScale);
+
+    rock.position.set(
+        x,
+        .55,
+        z
+    );
+
+    rock.userData={
+        resource:true,
+        type:"stone",
+        health:3,
+        collisionRadius:.8
+    };
+
+    scene.add(rock);
+
+    game.resources.push(rock);
+    game.collisions.push(rock);
+
+    freezeStaticObject(rock);
+    registerResourceSpatial(rock);
+    return rock;
+}
+
+
+
+
+
+/* BUSHES / BERRIES
+   Most bushes are ordinary. Some begin as berry bushes.
+   Fruiting bushes visibly show exactly 2 berries and can be
+   harvested once, then regrow after one complete in-game day.
+*/
+function createBush(x,z,hasBerries){
+    const bush=new THREE.Group();
+
+    const leaf1=new THREE.Mesh(NATURAL_ASSETS.bushLargeGeometry,NATURAL_ASSETS.bushLeafMaterial);
+    leaf1.scale.set(1.35,.78,1.0);
+    leaf1.position.set(0,.54,0);
+    bush.add(leaf1);
+
+    const leaf2=new THREE.Mesh(NATURAL_ASSETS.bushSmallGeometry,NATURAL_ASSETS.bushLeafMaterial);
+    leaf2.scale.set(1.0,.75,.9);
+    leaf2.position.set(-.48,.66,.08);
+    bush.add(leaf2);
+
+    const leaf3=leaf2.clone();
+    leaf3.position.set(.48,.64,-.05);
+    bush.add(leaf3);
+
+    bush.userData={
+        bush:true,
+        berryBush:hasBerries,
+        available:hasBerries,
+        regrowAt:null,
+        berryMeshes:[],
+        collisionRadius:.35
+    };
+
+    if(hasBerries){
+        // Large enough to be clearly visible while walking past.
+        const positions=[
+            new THREE.Vector3(-.34,.86,.62),
+            new THREE.Vector3(.38,.78,.58)
+        ];
+
+        positions.forEach(pos=>{
+            const berry=new THREE.Mesh(NATURAL_ASSETS.berryGeometry,NATURAL_ASSETS.berryMaterial);
+            berry.position.copy(pos);
+            bush.add(berry);
+            bush.userData.berryMeshes.push(berry);
+        });
+    }
+
+    bush.position.set(x,0,z);
+    scene.add(bush);
+    game.resources.push(bush);
+    game.collisions.push(bush);
+
+    freezeStaticObject(bush);
+    registerResourceSpatial(bush);
+    return bush;
+}
+
+
+/*
+   Spatial resource index. This prevents world generation, interaction and
+   planting checks from walking the entire 10x10 world as FRONTIER grows.
+*/
+const RESOURCE_CELL_SIZE=12;
+const resourceSpatial=new Map();
+
+function resourceCellCoord(v){
+    return Math.floor(v/RESOURCE_CELL_SIZE);
+}
+
+function resourceCellKey(cx,cz){
+    return cx+","+cz;
+}
+
+function registerResourceSpatial(resource){
+    if(!resource || !resource.position) return;
+    const cx=resourceCellCoord(resource.position.x);
+    const cz=resourceCellCoord(resource.position.z);
+    const key=resourceCellKey(cx,cz);
+    let bucket=resourceSpatial.get(key);
+    if(!bucket){
+        bucket=[];
+        resourceSpatial.set(key,bucket);
+    }
+    bucket.push(resource);
+    resource.userData.spatialCellKey=key;
+}
+
+function spatialResourcesNear(x,z,radius){
+    const out=[];
+    const minX=resourceCellCoord(x-radius);
+    const maxX=resourceCellCoord(x+radius);
+    const minZ=resourceCellCoord(z-radius);
+    const maxZ=resourceCellCoord(z+radius);
+
+    for(let cx=minX;cx<=maxX;cx++){
+        for(let cz=minZ;cz<=maxZ;cz++){
+            const bucket=resourceSpatial.get(resourceCellKey(cx,cz));
+            if(!bucket) continue;
+            for(const resource of bucket){
+                if(resource && resource.parent) out.push(resource);
+            }
+        }
+    }
+    return out;
+}
+
+function naturalResourcePositionClear(x,z,radius=.8){
+    // Keep the starting clearing/camp open.
+    if(Math.hypot(x,z)<17) return false;
+
+    const nearby=spatialResourcesNear(x,z,radius+3);
+    for(const r of nearby){
+        const rr=r.userData.collisionRadius||.5;
+        const limit=radius+rr+.35;
+        const dx=x-r.position.x;
+        const dz=z-r.position.z;
+        if(dx*dx+dz*dz<limit*limit) return false;
+    }
+    return true;
+}
+
+function placeNaturalResource(createFn,x,z,radius,...extra){
+    for(let tries=0;tries<18;tries++){
+        const px=x+(Math.random()-.5)*2.8;
+        const pz=z+(Math.random()-.5)*2.8;
+        if(naturalResourcePositionClear(px,pz,radius)){
+            createFn(px,pz,...extra);
+            return true;
+        }
+    }
+    return false;
+}
+
+function generateWorldChunk(cx,cz){
+    const b=chunkBounds(cx,cz);
+    const startChunk=(cx===0 && cz===0);
+
+    // Trees live around the four corners of every chunk.
+    const inset=5.5;
+    const corners=[
+        [b.minX+inset,b.minZ+inset],
+        [b.maxX-inset,b.minZ+inset],
+        [b.minX+inset,b.maxZ-inset],
+        [b.maxX-inset,b.maxZ-inset]
+    ];
+
+    for(const [tx,tz] of corners){
+        placeNaturalResource(createTree,tx,tz,.8);
+        if(Math.random()<.45){
+            placeNaturalResource(
+                createTree,
+                tx+(Math.random()-.5)*5,
+                tz+(Math.random()-.5)*5,
+                .8
+            );
+        }
+    }
+
+    for(let i=0;i<4;i++){
+        for(let tries=0;tries<20;tries++){
+            const x=b.minX+12+Math.random()*(CHUNK_SIZE-24);
+            const z=b.minZ+12+Math.random()*(CHUNK_SIZE-24);
+            if(startChunk && Math.hypot(x,z)<18) continue;
+            if(placeNaturalResource(createRock,x,z,.8)) break;
+        }
+    }
+
+    for(let i=0;i<6;i++){
+        for(let tries=0;tries<20;tries++){
+            const x=b.minX+10+Math.random()*(CHUNK_SIZE-20);
+            const z=b.minZ+10+Math.random()*(CHUNK_SIZE-20);
+            if(startChunk && Math.hypot(x,z)<18) continue;
+            if(placeNaturalResource(createBush,x,z,.35,Math.random()<.50)) break;
+        }
+    }
+
+    // Build this chunk's one animal only after its natural obstacles exist.
+    const pattern=Math.abs(cx*11+cz*7)%3;
+    spawnWildlife(pattern===0 ? "deer" : "rabbit",1,cx,cz);
+}
+
+const worldChunkBuildQueue=[];
+for(let cx=WORLD_MIN_CHUNK_X;cx<=WORLD_MAX_CHUNK_X;cx++){
+    for(let cz=WORLD_MIN_CHUNK_Z;cz<=WORLD_MAX_CHUNK_Z;cz++){
+        worldChunkBuildQueue.push([cx,cz]);
+    }
+}
+game.worldChunksTotal=worldChunkBuildQueue.length;
+
+function finishWorldBootstrap(){
+    game.worldReady=true;
+    game.worldBuilding=false;
+
+    // Warm shader programs after objects exist. This does not change visuals;
+    // it reduces the first-play hitch on browsers that defer shader compilation.
+    try{ renderer.compile(scene,camera); }catch(e){}
+
+    const enter=document.getElementById("enter");
+    if(enter){
+        enter.disabled=false;
+        enter.textContent="ENTER WORLD";
+    }
+
+    if(game.enterRequested){
+        enterFrontierWorld();
+    }
+}
+
+function scheduleNextWorldBuild(){
+    if(game.worldReady || !game.worldBuilding) return;
+
+    const runBatch=function(deadline){
+        let builtThisPass=0;
+
+        // Keep each browser task short. IdleCallback uses spare browser time;
+        // fallback browsers build two chunks then yield back to the page.
+        while(worldChunkBuildQueue.length){
+            if(deadline && deadline.timeRemaining && deadline.timeRemaining()<3 && builtThisPass>0) break;
+            if(!deadline && builtThisPass>=2) break;
+
+            const [cx,cz]=worldChunkBuildQueue.shift();
+            generateWorldChunk(cx,cz);
+            game.worldChunksBuilt++;
+            builtThisPass++;
+        }
+
+        if(worldChunkBuildQueue.length){
+            scheduleNextWorldBuild();
+        }else{
+            finishWorldBootstrap();
+        }
+    };
+
+    if("requestIdleCallback" in window){
+        requestIdleCallback(runBatch,{timeout:120});
+    }else{
+        setTimeout(()=>runBatch(null),0);
+    }
+}
+
+function beginWorldBootstrap(){
+    if(game.worldReady || game.worldBuilding) return;
+    game.worldBuilding=true;
+    scheduleNextWorldBuild();
+}dEventListener(
+    "keydown",
+    function(e){
+
+        keys[e.code]=true;
+
+        if(!game.running)
+            return;
+
+        if(anyPanelOpen()){
+
+            if(e.code==="Escape")
+                closeAllPanels();
+
+            return;
+
+        }
+
+        if(game.mode==="placement"){
+
+            if(e.code==="Escape"){
+
+                cancelPlacement();
+                return;
+
+            }
+
+            if(e.code==="KeyR"){
+
+                game.placementRotation+=
+                    Math.PI/2;
+
+                if(game.placementGhost){
+
+                    game.placementGhost.rotation.y=
+                        game.placementRotation;
+
+                }
+
+            }
+
+            return;
+
+        }
+
+        if(e.code==="KeyI"){
+
+            openBackpack();
+            return;
+
+        }
+
+        if(e.code==="KeyB"){
+
+            openBuildingMenu();
+            return;
+
+        }
+
+        if(e.code==="Digit1")
+            selectHotbar(0);
+
+        if(e.code==="Digit2")
+            selectHotbar(1);
+
+        if(e.code==="Digit3")
+            selectHotbar(2);
+
+        if(e.code==="Digit4")
+            selectHotbar(3);
+
+        if(e.code==="Digit5")
+            selectHotbar(4);
+
+        if(e.code==="KeyE")
+            interact();
+
+        if(e.code==="KeyQ")
+            gatherOrEat();
+
+    }
+);
+
+function releaseKey(e){
+    keys[e.code]=false;
+}
+
+// Listen on window in capture mode so movement keys are released even if
+// focus shifts between the canvas, HUD, or another element while playing.
+window.addEventListener("keyup",releaseKey,true);
+
+function clearMovementKeys(){
+    keys["KeyW"]=false;
+    keys["KeyA"]=false;
+    keys["KeyS"]=false;
+    keys["KeyD"]=false;
+    keys["ShiftLeft"]=false;
+    keys["ShiftRight"]=false;
+}
+
+// Browsers can miss keyup when the tab/window loses focus. Never allow that
+// to leave the player walking or sprinting forever.
+window.addEventListener("blur",clearMovementKeys);
+document.addEventListener("visibilitychange",function(){
+    if(document.hidden) clearMovementKeys();
+});
+
+/* MOUSE LOOK */
+
+let dragging=false;
+let previousMouseX=0;
+let previousMouseY=0;
+
+renderer.domElement.addEventListener(
+    "mousedown",
+    function(e){
+
+        if(
+            !game.running ||
+            game.mode!=="explore" ||
+            anyPanelOpen()
+        )
+            return;
+
+        dragging=true;
+
+        previousMouseX=e.clientX;
+        previousMouseY=e.clientY;
+
+    }
+);
+
+window.addEventListener(
+    "mouseup",
+    function(){
+        dragging=false;
+    }
+);
+
+window.addEventListener(
+    "mousemove",
+    function(e){
+
+        if(
+            !dragging ||
+            game.mode!=="explore"
+        )
+            return;
+
+        const dx=
+            e.clientX-previousMouseX;
+
+        const dy=
+            e.clientY-previousMouseY;
+
+        previousMouseX=e.clientX;
+        previousMouseY=e.clientY;
+
+        player.yaw-=dx*.005;
+        player.pitch-=dy*.004;
+
+        player.pitch=
+            Math.max(
+                -1.3,
+                Math.min(
+                    1.3,
+                    player.pitch
+                )
+            );
+
+    }
+);
+
+/* MOVEMENT */
+
+/*
+   PERFORMANCE 0.9994
+   Keep the full world exactly as it is, but only test collisions that are
+   close enough to possibly affect the player. The cache refreshes as the
+   player travels, so no collision behavior is removed.
+*/
+let nearbyCollisionCache=[];
+let nearbyCollisionCachePlayerX=Infinity;
+let nearbyCollisionCachePlayerZ=Infinity;
+let nearbyCollisionCacheLength=-1;
+let nearbyCollisionCacheAt=0;
+
+function refreshNearbyCollisionCache(force=false){
+    const now=performance.now();
+    const movedX=Math.abs(player.position.x-nearbyCollisionCachePlayerX);
+    const movedZ=Math.abs(player.position.z-nearbyCollisionCachePlayerZ);
+
+    if(
+        !force &&
+        game.collisions.length===nearbyCollisionCacheLength &&
+        movedX<3 &&
+        movedZ<3 &&
+        now-nearbyCollisionCacheAt<250
+    ) return;
+
+    nearbyCollisionCachePlayerX=player.position.x;
+    nearbyCollisionCachePlayerZ=player.position.z;
+    nearbyCollisionCacheLength=game.collisions.length;
+    nearbyCollisionCacheAt=now;
+    nearbyCollisionCache.length=0;
+
+    // 14 units is far beyond a single movement step, including sprinting.
+    const range=14;
+    for(const object of game.collisions){
+        if(!object || !object.parent || !object.position) continue;
+        const dx=object.position.x-player.position.x;
+        if(dx<-range || dx>range) continue;
+        const dz=object.position.z-player.position.z;
+        if(dz<-range || dz>range) continue;
+        nearbyCollisionCache.push(object);
+    }
+}
+
+function canMove(position){
+    const worldMinX=WORLD_MIN_CHUNK_X*CHUNK_SIZE-CHUNK_SIZE/2;
+    const worldMaxX=WORLD_MAX_CHUNK_X*CHUNK_SIZE+CHUNK_SIZE/2;
+    const worldMinZ=WORLD_MIN_CHUNK_Z*CHUNK_SIZE-CHUNK_SIZE/2;
+    const worldMaxZ=WORLD_MAX_CHUNK_Z*CHUNK_SIZE+CHUNK_SIZE/2;
+
+    if(position.x<worldMinX+.5 || position.x>worldMaxX-.5 ||
+       position.z<worldMinZ+.5 || position.z>worldMaxZ-.5){
+        return false;
+    }
+
+    refreshNearbyCollisionCache();
+
+    for(const object of nearbyCollisionCache){
+        if(!object.parent) continue;
+        const radius=object.userData.collisionRadius || .7;
+        const limit=radius+.42;
+        const dx=position.x-object.position.x;
+        if(Math.abs(dx)>=limit) continue;
+        const dz=position.z-object.position.z;
+        if(Math.abs(dz)>=limit) continue;
+        if(dx*dx+dz*dz<limit*limit){
+            return false;
+        }
+    }
+    return true;
+}
+
+
+function updateCabinInteriorLighting(){
+    // Shadows are disabled globally. Lighting still works normally.
+    renderer.shadowMap.enabled=false;
+}
+
+const movementTryX=new THREE.Vector3();
+const movementTryZ=new THREE.Vector3();
+
+function updatePlayer(delta){
+
+    updateCabinInteriorLighting();
+
+    if(
+        !game.running ||
+        game.mode!=="explore" ||
+        anyPanelOpen()
+    )
+        return;
+
+    camera.rotation.order="YXZ";
+
+    camera.rotation.y=player.yaw;
+    camera.rotation.x=player.pitch;
+
+    let forward=0;
+    let side=0;
+
+    if(keys["KeyW"]) forward++;
+    if(keys["KeyS"]) forward--;
+
+    if(keys["KeyD"]) side++;
+    if(keys["KeyA"]) side--;
+
+    if(forward!==0 || side!==0){
+
+        const length=
+            Math.hypot(
+                forward,
+                side
+            );
+
+        forward/=length;
+        side/=length;
+
+        const speed=
+            keys["ShiftLeft"] ||
+            keys["ShiftRight"]
+            ? player.sprintSpeed
+            : player.normalSpeed;
+
+        const forwardX=
+            -Math.sin(player.yaw);
+
+        const forwardZ=
+            -Math.cos(player.yaw);
+
+        const rightX=
+            Math.cos(player.yaw);
+
+        const rightZ=
+            -Math.sin(player.yaw);
+
+        const moveX=
+            (
+                forwardX*forward+
+                rightX*side
+            )*
+            speed*
+            delta;
+
+        const moveZ=
+            (
+                forwardZ*forward+
+                rightZ*side
+            )*
+            speed*
+            delta;
+
+        movementTryX.copy(player.position);
+        movementTryX.x+=moveX;
+
+        if(canMove(movementTryX))
+            player.position.x=movementTryX.x;
+
+        movementTryZ.copy(player.position);
+        movementTryZ.z+=moveZ;
+
+        if(canMove(movementTryZ))
+            player.position.z=movementTryZ.z;
+
+    }
+
+    camera.position.copy(
+        player.position
+    );
+
+}
+
+/* STACK INVENTORY HELPERS */
+
+const STACK_SIZE=50;
+const BACKPACK_SLOTS=5;
+
+function itemTotal(slots,id){
+    return slots.reduce((sum,slot)=>sum+(slot&&slot.id===id?slot.count:0),0);
+}
+
+function backpackTotal(id){
+    return itemTotal(game.backpack,id);
+}
+
+function canAddToSlots(slots,id,count,capacity=slots.length){
+    let room=0;
+    for(let i=0;i<capacity;i++){
+        const slot=slots[i];
+        if(!slot) room+=(ITEMS[id].type==="material"||ITEMS[id].type==="food"||ITEMS[id].type==="plantable")?STACK_SIZE:1;
+        else if(slot.id===id && (ITEMS[id].type==="material"||ITEMS[id].type==="food"||ITEMS[id].type==="plantable")) room+=STACK_SIZE-slot.count;
+    }
+    return room>=count;
+}
+
+function addToSlots(slots,id,count,capacity=slots.length){
+    if(count<=0) return 0;
+    if(ITEMS[id].type!=="material" && ITEMS[id].type!=="food" && ITEMS[id].type!=="plantable"){
+        let added=0;
+        while(count>0){
+            let i=-1;
+            for(let n=0;n<capacity;n++) if(!slots[n]){i=n;break;}
+            if(i<0) break;
+            slots[i]={id:id,count:1}; added++; count--;
+        }
+        return added;
+    }
+    let remaining=count;
+    for(let i=0;i<capacity && remaining>0;i++){
+        const slot=slots[i];
+        if(slot && slot.id===id && slot.count<STACK_SIZE){
+            const put=Math.min(STACK_SIZE-slot.count,remaining);
+            slot.count+=put; remaining-=put;
+        }
+    }
+    for(let i=0;i<capacity && remaining>0;i++){
+        if(!slots[i]){
+            const put=Math.min(STACK_SIZE,remaining);
+            slots[i]={id:id,count:put}; remaining-=put;
+        }
+    }
+    return count-remaining;
+}
+
+function removeFromSlots(slots,id,count){
+    let remaining=count;
+    for(let i=slots.length-1;i>=0 && remaining>0;i--){
+        const slot=slots[i];
+        if(slot && slot.id===id){
+            const take=Math.min(slot.count,remaining);
+            slot.count-=take; remaining-=take;
+            if(slot.count<=0) slots[i]=null;
+        }
+    }
+    return count-remaining;
+}
+
+function compactSlots(slots,capacity=slots.length){
+    const kept=slots.slice(0,capacity).filter(Boolean);
+    while(kept.length<capacity) kept.push(null);
+    slots.splice(0,slots.length,...kept);
+}
+
+function addToBackpack(id,count){
+    return addToSlots(game.backpack,id,count,BACKPACK_SLOTS);
+}
+
+function removeFromBackpack(id,count){
+    return removeFromSlots(game.backpack,id,count);
+}
+
+/* HOTBAR */
+
+function selectedItem(){
+    return game.hotbar[
+        game.selectedHotbar
+    ];
+}
+
+function selectHotbar(index){
+
+    game.selectedHotbar=index;
+    updateHotbar();
+
+}
+
+function updateHotbar(){
+
+    document
+    .querySelectorAll(".hotbarSlot")
+    .forEach(
+        function(slot,index){
+
+            slot.classList.toggle(
+                "selected",
+                index===game.selectedHotbar
+            );
+
+            slot.innerHTML=
+                '<span class="slotNumber">'+
+                (index+1)+
+                '</span>';
+
+            const id=
+                game.hotbar[index];
+
+            if(!id)
+                return;
+
+            slot.innerHTML+=
+                '<span class="itemIcon">'+
+                ITEMS[id].icon+
+                '</span>'+
+                '<span class="itemName">'+
+                ((id==="axe" && game.axeReinforced)?"Reinforced Axe":(id==="pickaxe" && game.pickaxeReinforced)?"Reinforced Pickaxe":ITEMS[id].name)+
+                '</span>';
+
+            if(id==="berries" || id==="sapling"){
+                slot.innerHTML+='<span class="itemCount">'+backpackTotal(id)+'</span>';
+            }
+
+        }
+    );
+
+    updateHeldItem();
+
+}
+
+document
+.querySelectorAll(".hotbarSlot")
+.forEach(
+    function(slot,index){
+
+        slot.addEventListener(
+            "click",
+            function(){
+                selectHotbar(index);
+            }
+        );
+
+    }
+);
+
+function updateHeldItem(){
+
+    const holder=
+        document.getElementById(
+            "heldItem"
+        );
+
+    if(game.mode!=="explore"){
+
+        holder.textContent="";
+        return;
+
+    }
+
+    const id=
+        selectedItem();
+
+    if(!id){
+
+        holder.textContent="";
+        return;
+
+    }
+
+    holder.textContent=
+        ITEMS[id].icon;
+
+    holder.style.fontSize=
+        ITEMS[id].type==="tool"
+        ? "82px"
+        : "60px";
+
+}
+
+/* BACKPACK */
+
+function openBackpack(){
+
+    document
+        .getElementById("backpack")
+        .style.display="flex";
+
+    renderBackpack();
+
+}
+
+function renderBackpack(){
+    const grid=document.getElementById("inventoryGrid");
+    grid.innerHTML="";
+    grid.style.gridTemplateColumns="repeat(5,1fr)";
+
+    // TOP ROW: the five actual backpack stack slots.
+    for(let i=0;i<BACKPACK_SLOTS;i++){
+        const data=game.backpack[i];
+        const slot=document.createElement("div");
+        slot.className="inventorySlot";
+
+        if(data){
+            const item=ITEMS[data.id];
+            const stackable=
+                item.type==="material" ||
+                item.type==="food" ||
+                item.type==="plantable";
+
+            slot.innerHTML=
+                '<div class="itemIcon">'+item.icon+'</div>'+
+                '<div class="itemName">'+item.name+'</div>'+
+                (stackable
+                    ?'<div class="itemCount">'+data.count+' / '+STACK_SIZE+'</div>'
+                    :'<div class="itemCount">ITEM</div>');
+
+            // Berries and Saplings may be assigned to the hotbar.
+            // Wood, Stone, Iron, Lumber, etc. remain backpack-only.
+            if(data.id==="berries" || data.id==="sapling"){
+                const id=data.id;
+                const assigned=game.hotbar.includes(id);
+                slot.style.cursor="pointer";
+                slot.title=assigned
+                    ?"Click to remove "+item.name+" from hotbar"
+                    :"Click to place "+item.name+" in an empty hotbar slot";
+
+                slot.addEventListener("click",function(){
+                    if(game.hotbar.includes(id)){
+                        game.hotbar=game.hotbar.map(hotbarId=>hotbarId===id?null:hotbarId);
+                        showMessage(item.name.toUpperCase()+" REMOVED FROM HOTBAR");
+                    }else{
+                        const empty=game.hotbar.indexOf(null);
+                        if(empty===-1){
+                            showMessage("HOTBAR FULL");
+                            return;
+                        }
+                        game.hotbar[empty]=id;
+                        showMessage(item.name.toUpperCase()+" ADDED TO HOTBAR");
+                    }
+                    updateUI();
+                    renderBackpack();
+                });
+            }
+        }else{
+            slot.innerHTML='<div style="opacity:.3">EMPTY</div>';
+        }
+
+        grid.appendChild(slot);
+    }
+
+    // BOTTOM ROW: the player's five hotbar slots.
+    for(let i=0;i<5;i++){
+        const id=game.hotbar[i];
+        const slot=document.createElement("div");
+        slot.className="inventorySlot backpackHotbarSlot";
+        slot.style.borderColor=i===game.selectedHotbar?"white":"#66745c";
+        slot.style.cursor="pointer";
+        slot.title="Hotbar slot "+(i+1);
+
+        if(id){
+            const item=ITEMS[id];
+            let countText="";
+
+            if(id==="berries" || id==="sapling"){
+                countText='<div class="itemCount">'+backpackTotal(id)+'</div>';
+            }else if(item.type==="tool"){
+                countText='<div class="itemCount">TOOL</div>';
+            }
+
+            slot.innerHTML=
+                '<div class="slotNumber">'+(i+1)+'</div>'+
+                '<div class="itemIcon">'+item.icon+'</div>'+
+                '<div class="itemName">'+
+                ((id==="axe" && game.axeReinforced)?"Reinforced Axe":
+                 (id==="pickaxe" && game.pickaxeReinforced)?"Reinforced Pickaxe":
+                 item.name)+
+                '</div>'+
+                countText;
+        }else{
+            slot.innerHTML=
+                '<div class="slotNumber">'+(i+1)+'</div>'+
+                '<div style="opacity:.3">HOTBAR<br>EMPTY</div>';
+        }
+
+        slot.addEventListener("click",function(){
+            game.selectedHotbar=i;
+            updateUI();
+            renderBackpack();
+        });
+
+        grid.appendChild(slot);
+    }
+}
+
+/* SEARCH */
+
+function nearbyResource(){
+    let closest=null;
+    let closestDistanceSq=3.3*3.3;
+    const candidates=spatialResourcesNear(player.position.x,player.position.z,3.3);
+
+    for(const resource of candidates){
+        const dx=player.position.x-resource.position.x;
+        const dz=player.position.z-resource.position.z;
+        const dSq=dx*dx+dz*dz;
+
+        if(dSq<closestDistanceSq){
+            closestDistanceSq=dSq;
+            closest=resource;
+        }
+    }
+
+    return closest;
+}
+
+function tentCratePosition(){
+
+    const pos=
+        new THREE.Vector3();
+
+    game.tentCrate
+        .getWorldPosition(pos);
+
+    return pos;
+
+}
+
+function nearbyProject(){
+
+    for(const project of game.projects){
+
+        if(project.complete)
+            continue;
+
+        if(
+            distanceXZ(
+                player.position,
+                project.group.position
+            )
+            <5
+        ){
+
+            return project;
+
+        }
+
+    }
+
+    return null;
+
+}
+
+function nearbyFinishedBuilding(){
+
+    for(const building of game.finishedBuildings){
+
+        const dist=
+            distanceXZ(
+                player.position,
+                building.group.position
+            );
+
+        if(
+            dist<
+            Math.max(
+                4,
+                building.data.width*.55
+            )
+        ){
+
+            return building;
+
+        }
+
+    }
+
+    return null;
+
+}
+
+/* INTERACT */
+
+function worldToLocalPoint(group,worldPoint){
+    const local=worldPoint.clone();
+    group.worldToLocal(local);
+    return local;
+}
+
+function isInsideBuilding(building){
+    if(!building) return false;
+    const local=worldToLocalPoint(building.group,player.position);
+    const halfW=building.data.width*.36;
+    const halfD=building.data.depth*.35;
+    return Math.abs(local.x)<halfW && Math.abs(local.z)<halfD;
+}
+
+function nearbyWorkshopStation(building){
+    if(!building || building.id!=="workshop" || !isInsideBuilding(building)) return null;
+    const local=worldToLocalPoint(building.group,player.position);
+    const stations=building.stations||{};
+    let best=null;
+    let bestDist=Infinity;
+    Object.keys(stations).forEach(id=>{
+        const s=stations[id];
+        const d=Math.hypot(local.x-s.x,local.z-s.z);
+        if(d<bestDist){bestDist=d;best=id;}
+    });
+    return bestDist<2.0 ? best : null;
+}
+
+function saplingPlantPoint(){
+    const direction=new THREE.Vector3();
+    camera.getWorldDirection(direction);
+    direction.y=0;
+
+    if(direction.lengthSq()<.001){
+        direction.set(0,0,1);
+    }else{
+        direction.normalize();
+    }
+
+    return new THREE.Vector3(
+        player.position.x+direction.x*3.0,
+        0,
+        player.position.z+direction.z*3.0
+    );
+}
+
+function saplingPlantingIsValid(point){
+    const worldMinX=WORLD_MIN_CHUNK_X*CHUNK_SIZE-CHUNK_SIZE/2;
+    const worldMaxX=WORLD_MAX_CHUNK_X*CHUNK_SIZE+CHUNK_SIZE/2;
+    const worldMinZ=WORLD_MIN_CHUNK_Z*CHUNK_SIZE-CHUNK_SIZE/2;
+    const worldMaxZ=WORLD_MAX_CHUNK_Z*CHUNK_SIZE+CHUNK_SIZE/2;
+
+    if(point.x<worldMinX+2.3 || point.x>worldMaxX-2.3 ||
+       point.z<worldMinZ+2.3 || point.z>worldMaxZ-2.3){
+        return false;
+    }
+
+    // Leave enough room for the tree's full canopy, not just its trunk.
+    const treeClearance=2.5;
+
+    const nearbyResources=spatialResourcesNear(point.x,point.z,treeClearance+3);
+    for(const r of nearbyResources){
+        const rr=r.userData.collisionRadius||.5;
+        const limit=treeClearance+rr;
+        const dx=point.x-r.position.x;
+        const dz=point.z-r.position.z;
+        if(dx*dx+dz*dz<limit*limit) return false;
+    }
+
+    for(const p of game.projects){
+        if(p.complete) continue;
+        const radius=Math.hypot(p.data.width/2,p.data.depth/2)*.65;
+        if(distanceXZ(point,p.group.position)<treeClearance+radius) return false;
+    }
+
+    for(const b of game.finishedBuildings){
+        const radius=Math.hypot(b.data.width/2,b.data.depth/2)*.65;
+        if(distanceXZ(point,b.group.position)<treeClearance+radius) return false;
+    }
+
+    if(!game.tentPacked && game.tent &&
+       distanceXZ(point,game.tent.position)<treeClearance+3.4){
+        return false;
+    }
+
+    return true;
+}
+
+function createPlantedSapling(x,z){
+    // Reuse the existing tree model so the mature result looks exactly like
+    // every other tree in FRONTIER.
+    createTree(x,z);
+
+    const tree=game.resources[game.resources.length-1];
+    if(!tree) return null;
+
+    tree.matrixAutoUpdate=true;
+    tree.userData.growingSapling=true;
+    tree.userData.plantedAt=absoluteGameMinutes();
+    tree.userData.matureAt=tree.userData.plantedAt+(3*1440);
+
+    // Start as a visibly small sapling.
+    tree.scale.setScalar(.18);
+    tree.userData.collisionRadius=.25;
+
+    return tree;
+}
+
+function updatePlantedSaplings(){
+    const now=absoluteGameMinutes();
+
+    for(const tree of game.resources){
+        if(!tree || !tree.parent || !tree.userData.growingSapling) continue;
+
+        const total=tree.userData.matureAt-tree.userData.plantedAt;
+        const elapsed=Math.max(0,Math.min(total,now-tree.userData.plantedAt));
+        const progress=total>0 ? elapsed/total : 1;
+
+        // Smooth growth from tiny sapling to full-size tree over 3 days.
+        const eased=progress*progress*(3-2*progress);
+        const scale=.18+(.82*eased);
+
+        tree.scale.setScalar(scale);
+        tree.userData.collisionRadius=.25+(.55*eased);
+
+        if(progress>=1){
+            tree.scale.setScalar(1);
+            tree.userData.collisionRadius=.8;
+            tree.userData.growingSapling=false;
+            tree.userData.plantedAt=null;
+            tree.userData.matureAt=null;
+            tree.updateMatrix();
+            tree.matrixAutoUpdate=false;
+        }
+    }
+}
+
+function plantSelectedSapling(){
+    if(backpackTotal("sapling")<=0){
+        game.hotbar=game.hotbar.map(id=>id==="sapling"?null:id);
+        showMessage("NO SAPLINGS");
+        updateUI();
+        return;
+    }
+
+    const point=saplingPlantPoint();
+
+    if(!saplingPlantingIsValid(point)){
+        showMessage("NEED MORE OPEN GROUND TO PLANT");
+        return;
+    }
+
+    // Plant a small sapling that grows into a full-size tree over 3 days.
+    createPlantedSapling(point.x,point.z);
+    removeFromBackpack("sapling",1);
+
+    if(backpackTotal("sapling")<=0){
+        game.hotbar=game.hotbar.map(id=>id==="sapling"?null:id);
+    }
+
+    showMessage("SAPLING PLANTED");
+    updateUI();
+}
+
+function interact(){
+    if(selectedItem()==="sapling"){
+        plantSelectedSapling();
+        return;
+    }
+
+    // With the Axe selected, E harvests the next canopy on a nearby tree.
+    // This keeps canopy harvesting separate from Q chopping.
+    if(selectedItem()==="axe" && lookingUpForCanopy()){
+        const resource=nearbyResource();
+        if(resource && resource.userData.type==="wood" && !resource.userData.growingSapling){
+            const canopy=nextTreeCanopy(resource);
+            if(canopy){
+                harvestTreeCanopy(canopy);
+                return;
+            }
+        }
+    }
+
+    // Berries can be eaten with E when selected.
+    if(selectedItem()==="berries"){
+        eatBerry();
+        return;
+    }
+
+    // Cabin door interaction: must be close and aiming the center dot toward the door.
+    for(const cabin of game.finishedBuildings){
+        if(cabin.id!=="cabin" || !cabin.cabinDoorPivot) continue;
+
+        const doorPos=new THREE.Vector3(0,1.35,cabin.data.depth/2+.22);
+        doorPos.applyAxisAngle(new THREE.Vector3(0,1,0),cabin.group.rotation.y);
+        doorPos.add(cabin.group.position);
+
+        const toDoor=doorPos.clone().sub(camera.position);
+        const doorDistance=toDoor.length();
+
+        if(doorDistance<3.2){
+            toDoor.normalize();
+            const lookDir=new THREE.Vector3();
+            camera.getWorldDirection(lookDir);
+
+            if(doorDistance<1.65 || lookDir.dot(toDoor)>.94){
+                cabin.cabinDoorOpen=!cabin.cabinDoorOpen;
+                cabin.cabinDoorPivot.rotation.y=
+                    cabin.cabinDoorOpen ? Math.PI/2 : 0;
+
+                if(cabin.cabinDoorOpen){
+                    game.collisions=
+                        game.collisions.filter(o=>o!==cabin.cabinDoorBlocker);
+                    showMessage("CABIN DOOR OPEN");
+                }else{
+                    if(
+                        cabin.cabinDoorBlocker &&
+                        !game.collisions.includes(cabin.cabinDoorBlocker)
+                    ){
+                        game.collisions.push(cabin.cabinDoorBlocker);
+                    }
+                    showMessage("CABIN DOOR CLOSED");
+                }
+                return;
+            }
+        }
+    }
+
+    for(const b of game.finishedBuildings){
+        if(b.id==="cabin" && b.cabinBed){
+            const bedPos=new THREE.Vector3();
+            b.cabinBed.getWorldPosition(bedPos);
+            if(distanceXZ(player.position,bedPos)<2.1){
+                if(canSleepNow()) sleepUntilMorning();
+                else showMessage("YOU CAN SLEEP AT OR AFTER SUNSET");
+                return;
+            }
+        }
+    }
+
+
+    if(selectedItem()==="packedTent"){
+        startPackedTentPlacement();
+        return;
+    }
+
+const project=nearbyProject();
+    if(project){
+        openProjectMenu(project);
+        return;
+    }
+
+    // Finished buildings now use real interiors.
+    for(const finished of game.finishedBuildings){
+        if(finished.id==="storage" && isInsideBuilding(finished)){
+            openStorage(finished.storage);
+            return;
+        }
+        if(finished.id==="workshop" && isInsideBuilding(finished)){
+            const station=nearbyWorkshopStation(finished);
+            if(station){
+                openWorkshopStation(finished,station);
+                return;
+            }
+            showMessage("MOVE CLOSER TO A WORKSHOP STATION");
+            return;
+        }
+        if(finished.id==="cabin" && isInsideBuilding(finished)){
+            showMessage("YOUR CABIN • HOMESTEAD ESTABLISHED");
+            return;
+        }
+    }
+
+    if(game.bedroll){const bedPos=new THREE.Vector3();game.bedroll.getWorldPosition(bedPos);if(distanceXZ(player.position,bedPos)<2.0){if(canSleepNow())sleepUntilMorning();else showMessage("YOU CAN SLEEP AT OR AFTER SUNSET");return;}}
+
+    if(distanceXZ(player.position,tentCratePosition())<2.3){
+        openStorage(game.starterCrate);
+        return;
+    }
+}
+
+
+
+const canopyLookDirection=new THREE.Vector3();
+
+function lookingUpForCanopy(){
+    camera.getWorldDirection(canopyLookDirection);
+
+    // Require a clearly upward look before canopy harvesting is offered.
+    return canopyLookDirection.y>0.28;
+}
+
+function nextTreeCanopy(tree){
+    if(!tree || !tree.parent || tree.userData.growingSapling) return null;
+
+    const upper=tree.userData.upperCanopy;
+    const lower=tree.userData.lowerCanopy;
+
+    if(upper && upper.visible){
+        return {tree:tree,mesh:upper,part:"upper"};
+    }
+
+    if(lower && lower.visible){
+        return {tree:tree,mesh:lower,part:"lower"};
+    }
+
+    return null;
+}
+
+function harvestTreeCanopy(target){
+    const tree=target.tree;
+    const mesh=target.mesh;
+    const part=target.part;
+
+    if(target.regrowing || !mesh){
+        showMessage("CANOPY IS REGROWING");
+        return;
+    }
+
+    if(!mesh.visible){
+        showMessage("THAT CANOPY IS REGROWING");
+        return;
+    }
+
+    if(selectedItem()!=="axe"){
+        showMessage("SELECT YOUR AXE");
+        return;
+    }
+
+    if(game.toolDurability.axe<=0){
+        showMessage("AXE BROKEN • REPAIR AT WORKSHOP");
+        return;
+    }
+
+    // A successful canopy harvest always works, even if the backpack is full.
+    // The sapling is only awarded when its 30% roll succeeds and there is room.
+    swingTool();
+    game.toolDurability.axe=Math.max(0,game.toolDurability.axe-1);
+    mesh.visible=false;
+
+    // Each canopy takes one full in-game day, sequentially.
+    // If one is already regrowing, the next harvested canopy is scheduled
+    // one day after the last queued canopy.
+    const now=absoluteGameMinutes();
+    const queue=tree.userData.canopyRegrowQueue||[];
+    let regrowAt=now+1440;
+    if(queue.length){
+        regrowAt=Math.max(regrowAt,queue[queue.length-1].regrowAt+1440);
+    }
+    queue.push({part,mesh,regrowAt});
+    tree.userData.canopyRegrowQueue=queue;
+
+    let msg=(part==="upper" ? "TOP" : "BOTTOM")+" CANOPY HARVESTED";
+
+    if(Math.random()<0.30){
+        if(canAddToSlots(game.backpack,"sapling",1,BACKPACK_SLOTS)){
+            addToBackpack("sapling",1);
+            msg+=" • +1 SAPLING";
+        }else{
+            msg+=" • SAPLING LOST (BACKPACK FULL)";
+        }
+    }else{
+        msg+=" • NO SAPLING";
+    }
+
+    showMessage(msg);
+    updateUI();
+}
+
+function updateTreeCanopyRegrowth(){
+    const now=absoluteGameMinutes();
+
+    for(const tree of game.resources){
+        if(!tree || !tree.parent || tree.userData.type!=="wood") continue;
+
+        const queue=tree.userData.canopyRegrowQueue;
+        if(!queue || !queue.length) continue;
+
+        while(queue.length && now>=queue[0].regrowAt){
+            const entry=queue.shift();
+            if(entry.mesh && tree.parent){
+                entry.mesh.visible=true;
+            }
+        }
+    }
+}
+
+function gatherOrEat(){
+    if(
+        !game.running ||
+        game.mode!=="explore" ||
+        anyPanelOpen()
+    ) return;
+
+    // Q is only for mining/gathering. Eating is E only.
+    // Trees can be chopped normally even while their canopies are still present.
+    const resource=nearbyResource();
+    if(!resource){
+        showMessage("Nothing nearby.");
+        return;
+    }
+
+    const selected=selectedItem();
+
+    // Berry picking moved to Q.
+    if(resource.userData.berryBush){
+        harvestBerryBush(resource);
+        return;
+    }
+
+    if(resource.userData.growingSapling){
+        showMessage("SAPLING IS STILL GROWING");
+        return;
+    }
+
+    if(resource.userData.bush){
+        showMessage("NO BERRIES ON THIS BUSH");
+        return;
+    }
+
+    if(resource.userData.type==="wood" && selected!=="axe"){
+        showMessage("SELECT YOUR AXE");
+        return;
+    }
+
+    if(resource.userData.type==="stone" && selected!=="pickaxe"){
+        showMessage("SELECT YOUR PICKAXE");
+        return;
+    }
+
+    const usedTool=resource.userData.type==="wood"?"axe":"pickaxe";
+    if(game.toolDurability[usedTool]<=0){
+        showMessage(
+            usedTool==="axe"
+            ?"AXE BROKEN • REPAIR AT WORKSHOP"
+            :"PICKAXE BROKEN • REPAIR AT WORKSHOP"
+        );
+        return;
+    }
+
+    swingTool();
+
+    const resourceType=resource.userData.type;
+    const hitAmount=1;
+    const rawIronDrop=(resourceType==="stone" && Math.random()<0.20) ? 1 : 0;
+
+    if(!canAddToSlots(game.backpack,resourceType,1,BACKPACK_SLOTS)){
+        showMessage("BACKPACK FULL");
+        return;
+    }
+
+    if(rawIronDrop && !canAddToSlots(game.backpack,"rawIron",1,BACKPACK_SLOTS)){
+        showMessage("BACKPACK FULL • NO ROOM FOR RAW IRON");
+        return;
+    }
+
+    resource.userData.health--;
+    game.toolDurability[usedTool]=Math.max(0,game.toolDurability[usedTool]-1);
+    addToBackpack(resourceType,1);
+
+    let msg="+1 "+resourceType.toUpperCase();
+
+    if(rawIronDrop){
+        addToBackpack("rawIron",1);
+        msg+=" • +1 RAW IRON";
+    }
+
+    if(resource.userData.health<=0){
+        if(resource.userData.canopyRegrowQueue){
+            resource.userData.canopyRegrowQueue.length=0;
+        }
+        scene.remove(resource);
+        game.resources=game.resources.filter(r=>r!==resource);
+        game.collisions=game.collisions.filter(r=>r!==resource);
+        msg+=" • RESOURCE BROKE";
+    }
+
+    showMessage(msg);
+    updateUI();
+}
+
+
+function swingTool(){
+
+    document
+        .getElementById(
+            "heldItem"
+        )
+        .animate(
+
+            [
+                {
+                    transform:
+                    "rotate(-18deg)"
+                },
+
+                {
+                    transform:
+                    "rotate(-70deg)"
+                },
+
+                {
+                    transform:
+                    "rotate(-18deg)"
+                }
+            ],
+
+            {
+                duration:250
+            }
+
+        );
+
+}
+
+
+/* PORTABLE CAMP + BUILDING MOVE SYSTEM */
+
+function setTentCampVisible(visible){
+    if(game.tent) game.tent.visible=visible;
+    if(game.campfire) game.campfire.visible=visible;
+
+    // Tent wall blockers have no visible mesh, so disable their collision while packed.
+    game.collisions.forEach(c=>{
+        if(c.userData && c.userData.tentBlocker){
+            c.userData.collisionRadius=visible ? .4 : 0;
+        }
+    });
+}
+
+function canPackTent(){
+    return !!(game.completed && game.completed.cabin) && !game.tentPacked;
+}
+
+function packTentCamp(){
+    if(!(game.completed && game.completed.cabin)){
+        showMessage("BUILD A CABIN BEFORE PACKING YOUR TENT");
+        return;
+    }
+    if(game.tentPacked){
+        showMessage("TENT IS ALREADY PACKED");
+        return;
+    }
+    if(!canAddToSlots(game.backpack,"packedTent",1,BACKPACK_SLOTS)){
+        showMessage("BACKPACK NEEDS ONE EMPTY SLOT");
+        return;
+    }
+
+    addToBackpack("packedTent",1);
+    game.tentPacked=true;
+    setTentCampVisible(false);
+
+    if(!game.hotbar.includes("packedTent")){
+        const empty=game.hotbar.indexOf(null);
+        if(empty!==-1) game.hotbar[empty]="packedTent";
+    }
+
+    updateUI();
+    showMessage("ENTIRE TENT CAMP PACKED");
+}
+
+function startPackedTentPlacement(){
+    if(backpackTotal("packedTent")<=0){
+        showMessage("NO PACKED TENT");
+        return;
+    }
+
+    closeAllPanels();
+    game.mode="tentPlacement";
+    game.placementRotation=game.tent ? game.tent.rotation.y : 0;
+    game.placementPosition=player.position.clone();
+
+    document.getElementById("placementUI").style.display="block";
+    document.getElementById("placementHeader").textContent="SET UP TENT CAMP";
+    document.getElementById("placementInfo").innerHTML="<b>⛺ PACKED TENT</b><br>Places the tent, sleeping bag, lantern, storage crate and campfire together.";
+    document.getElementById("placementHelp").textContent="MOVE MOUSE • R ROTATE • CLICK PLACE • ESC CANCEL";
+    document.getElementById("hotbar").style.display="none";
+    document.getElementById("crosshair").style.display="none";
+    document.getElementById("heldItem").style.display="none";
+
+    const ghost=new THREE.Group();
+    const base=new THREE.Mesh(
+        new THREE.BoxGeometry(7.2,.12,6.2),
+        new THREE.MeshStandardMaterial({color:0x61e66c,transparent:true,opacity:.35})
+    );
+    base.position.y=.06;
+    ghost.add(base);
+
+    const tentMass=new THREE.Mesh(
+        new THREE.BoxGeometry(4.8,2.7,3.8),
+        new THREE.MeshStandardMaterial({color:0xd9efc9,transparent:true,opacity:.18})
+    );
+    tentMass.position.set(-.6,1.35,0);
+    ghost.add(tentMass);
+
+    scene.add(ghost);
+    game.placementGhost=ghost;
+
+    camera.position.set(player.position.x,32,player.position.z);
+    camera.lookAt(player.position.x,0,player.position.z);
+}
+
+function placeTentCampAt(x,z,rotation){
+    if(!game.tent) return;
+
+    const oldTentPos=game.tent.position.clone();
+    const oldRot=game.tent.rotation.y;
+    const deltaRot=rotation-oldRot;
+
+    // Campfire offset is rotated with the campsite.
+    let fireOffset=null;
+    if(game.campfire){
+        fireOffset=game.campfire.position.clone().sub(oldTentPos);
+        fireOffset.applyAxisAngle(new THREE.Vector3(0,1,0),deltaRot);
+    }
+
+    // Update invisible tent blockers by preserving local offsets.
+    game.collisions.forEach(c=>{
+        if(c.userData && c.userData.tentBlocker){
+            const rel=c.position.clone().sub(oldTentPos);
+            rel.applyAxisAngle(new THREE.Vector3(0,1,0),deltaRot);
+            c.position.set(x+rel.x,0,z+rel.z);
+        }
+    });
+
+    game.tent.position.set(x,0,z);
+    game.tent.rotation.y=rotation;
+
+    if(game.campfire && fireOffset){
+        game.campfire.position.set(x+fireOffset.x,0,z+fireOffset.z);
+    }
+
+    removeFromBackpack("packedTent",1);
+    game.hotbar=game.hotbar.map(id=>id==="packedTent"?null:id);
+    game.tentPacked=false;
+    setTentCampVisible(true);
+    updateUI();
+    showMessage("TENT CAMP SET UP");
+}
+
+function beginMoveBuilding(building){
+    if(!building || !building.group) return;
+
+    closeAllPanels();
+
+    game.movingBuilding=building;
+    game.moveOriginal={
+        position:building.group.position.clone(),
+        rotationY:building.group.rotation.y,
+        blockerLocals:(building.blockers||[]).map(blocker=>{
+            const local=blocker.position.clone();
+            building.group.worldToLocal(local);
+            return {blocker,local};
+        })
+    };
+
+    game.mode="moveBuilding";
+    game.placementValid=placementIsValid(
+        building.id,
+        building.group.position,
+        building
+    );
+
+    document.getElementById("placementUI").style.display="block";
+    document.getElementById("placementHeader").textContent="MOVE "+building.data.name.toUpperCase();
+    document.getElementById("placementInfo").innerHTML=
+        "<b>"+building.data.icon+" "+building.data.name+
+        "</b><br>Move the mouse for exact placement. R rotates. Click to place.";
+    document.getElementById("placementHelp").textContent=
+        "MOVE MOUSE • R ROTATE • CLICK PLACE • ESC CANCEL";
+
+    document.getElementById("hotbar").style.display="none";
+    document.getElementById("crosshair").style.display="none";
+    document.getElementById("heldItem").style.display="none";
+
+    // True bird's-eye view centered on the selected structure.
+    const center=building.group.position;
+    camera.position.set(center.x,34,center.z+0.01);
+    camera.rotation.set(-Math.PI/2,0,0);
+}
+
+function setBuildingMovePreview(building,valid){
+    if(!building || !building.group) return;
+    building.group.traverse(child=>{
+        if(child.isMesh && child.material){
+            child.material.transparent=!valid;
+            child.material.opacity=valid?1:.48;
+        }
+    });
+}
+
+function updateMovedBuildingBlockers(){
+    if(!game.movingBuilding || !game.moveOriginal) return;
+    for(const entry of game.moveOriginal.blockerLocals){
+        const world=entry.local.clone();
+        game.movingBuilding.group.localToWorld(world);
+        entry.blocker.position.copy(world);
+    }
+}
+
+function cancelMoveBuilding(){
+    if(!game.movingBuilding || !game.moveOriginal) return;
+
+    const moving=game.movingBuilding;
+    moving.group.position.copy(game.moveOriginal.position);
+    moving.group.rotation.y=game.moveOriginal.rotationY;
+    updateMovedBuildingBlockers();
+    setBuildingMovePreview(moving,true);
+
+    game.movingBuilding=null;
+    game.moveOriginal=null;
+    game.mode="explore";
+    document.getElementById("placementUI").style.display="none";
+    exitBirdsEye();
+    showMessage("MOVE CANCELED");
+}
+
+function confirmMoveBuilding(){
+    if(!game.movingBuilding) return;
+
+    const moving=game.movingBuilding;
+    updateMovedBuildingBlockers();
+    setBuildingMovePreview(moving,true);
+    game.movingBuilding=null;
+    game.moveOriginal=null;
+    game.mode="explore";
+    document.getElementById("placementUI").style.display="none";
+    exitBirdsEye();
+    showMessage("BUILDING MOVED");
+}
+
+function exitBirdsEye(){
+    document.getElementById("hotbar").style.display="flex";
+    document.getElementById("crosshair").style.display="block";
+    updateHeldItem();
+    yaw=player.rotation.y;
+    camera.rotation.set(pitch,yaw,0,"YXZ");
+    camera.position.copy(player.position);
+    camera.position.y+=player.eyeHeight;
+}
+
+function renderMoveMenu(){
+    const grid=document.getElementById("moveGrid");
+    if(!grid) return;
+
+    grid.innerHTML="";
+
+    if(game.finishedBuildings.length===0){
+        grid.innerHTML='<div style="grid-column:1/-1;opacity:.6;padding:12px">NO FINISHED BUILDINGS TO MOVE YET</div>';
+        return;
+    }
+
+    const counts={};
+    game.finishedBuildings.forEach(building=>{
+        counts[building.id]=(counts[building.id]||0)+1;
+        const card=document.createElement("div");
+        card.className="moveCard";
+
+        const number=building.id==="storage" ? " "+counts[building.id] : "";
+        card.innerHTML=
+            '<div class="moveCardTitle">'+building.data.icon+' '+building.data.name+number+'</div>'+
+            '<div class="moveCardSub">CLICK TO MOVE • R ROTATES • CLICK GROUND TO PLACE</div>';
+
+        card.addEventListener("click",function(ev){
+            ev.stopPropagation();
+            beginMoveBuilding(building);
+        });
+
+        grid.appendChild(card);
+    });
+}
+
+function showBuildTab(which){
+    const buildGrid=document.getElementById("buildingGrid");
+    const moveGrid=document.getElementById("moveGrid");
+    const buildTab=document.getElementById("buildTab");
+    const moveTab=document.getElementById("moveTab");
+    if(!buildGrid || !moveGrid || !buildTab || !moveTab) return;
+
+    if(which==="move"){
+        buildGrid.style.display="none";
+        moveGrid.style.display="grid";
+        buildTab.classList.remove("active");
+        moveTab.classList.add("active");
+        renderMoveMenu();
+    }else{
+        moveGrid.style.display="none";
+        buildGrid.style.display="grid";
+        moveTab.classList.remove("active");
+        buildTab.classList.add("active");
+    }
+}
+
+/* BUILD MENU */
+
+function unlockCount(){
+    let count=0;
+    if(game.completed.storage) count++;
+    if(game.completed.workshop) count++;
+    return count;
+}
+
+function openBuildingMenu(){
+    if(game.mode!=="explore" || anyPanelOpen()) return;
+
+    document.getElementById("buildingMenu").style.display="flex";
+    document.getElementById("crosshair").style.display="none";
+    document.getElementById("prompt").style.opacity=0;
+
+    renderBuildingMenu();
+    renderMoveMenu();
+    showBuildTab("build");
+}
+
+function renderBuildingMenu(){
+
+    const grid=
+        document.getElementById(
+            "buildingGrid"
+        );
+
+    grid.innerHTML="";
+
+    Object.keys(BUILDINGS)
+    .forEach(
+        function(id){
+
+            const data=
+                BUILDINGS[id];
+
+            const unlocked=
+                id==="cabin"
+                ? game.completed.workshop
+                : unlockCount()>=data.unlock;
+
+            const built=
+                id==="storage" ? false : game.completed[id];
+
+            const card=
+                document.createElement(
+                    "div"
+                );
+
+            card.className=
+                "buildingCard"+
+                (
+                    unlocked&&!built
+                    ? ""
+                    : " locked"
+                );
+
+            card.innerHTML=
+                '<div class="buildingIcon">'+
+                data.icon+
+                '</div>'+
+                '<div class="buildingName">'+
+                data.name+
+                '</div>'+
+                '<div class="buildingDescription">'+
+                data.description+
+                '</div>'+
+                '<div class="buildingCost">'+
+                (data.wood ? '🪵 '+data.wood+' Wood ' : '')+
+                (data.stone ? ' • 🪨 '+data.stone+' Stone ' : '')+
+                (data.lumber ? '🪚 '+data.lumber+' Lumber ' : '')+
+                (data.iron ? ' • ⚙️ '+data.iron+' Iron' : '')+
+                '</div>';
+
+            if(built){
+
+                card.innerHTML+=
+                    '<div style="margin-top:8px;font-size:11px">✓ BUILT</div>';
+
+            }
+
+            if(
+                unlocked &&
+                !built
+            ){
+
+                card.addEventListener(
+                    "click",
+                    function(){
+
+                        startPlacement(id);
+
+                    }
+                );
+
+            }
+
+            grid.appendChild(card);
+
+        }
+    );
+
+}
+
+/* PLACEMENT */
+
+function startPlacement(id){
+
+    closeAllPanels();
+
+    game.mode="placement";
+
+    game.selectedBuilding=id;
+
+    game.placementRotation=0;
+
+    document
+        .getElementById(
+            "placementUI"
+        )
+        .style.display="block";
+
+    document
+        .getElementById(
+            "hotbar"
+        )
+        .style.display="none";
+
+    document
+        .getElementById(
+            "crosshair"
+        )
+        .style.display="none";
+
+    document
+        .getElementById(
+            "heldItem"
+        )
+        .style.display="none";
+
+    const data=
+        BUILDINGS[id];
+
+    document
+        .getElementById(
+            "placementInfo"
+        )
+        .innerHTML=
+        '<b>'+
+        data.icon+
+        ' '+
+        data.name+
+        '</b><br><br>'+
+        '🪵 '+data.wood+
+        '<br>🪨 '+data.stone;
+
+    camera.position.set(
+        player.position.x,
+        32,
+        player.position.z
+    );
+
+    camera.lookAt(
+        player.position.x,
+        0,
+        player.position.z
+    );
+
+    createPlacementGhost(id);
+
+}
+
+function createPlacementGhost(id){
+
+    const data=
+        BUILDINGS[id];
+
+    const group=
+        new THREE.Group();
+
+    const base=
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                data.width,
+                .15,
+                data.depth
+            ),
+
+            new THREE.MeshStandardMaterial({
+                color:0x61e66c,
+                transparent:true,
+                opacity:.45
+            })
+
+        );
+
+    base.position.y=.08;
+
+    group.add(base);
+
+    const mass=
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                data.width*.75,
+                3,
+                data.depth*.7
+            ),
+
+            new THREE.MeshStandardMaterial({
+                color:0xd9efc9,
+                transparent:true,
+                opacity:.2
+            })
+
+        );
+
+    mass.position.y=1.5;
+
+    group.add(mass);
+
+    scene.add(group);
+
+    game.placementGhost=group;
+
+}
+
+
+function placementIsValid(id,point,excludeBuilding=null,extraRadius=0){
+    const data=BUILDINGS[id];
+    const radius=Math.hypot(data.width/2,data.depth/2)*.72+extraRadius;
+
+    for(const r of game.resources){
+        if(!r.parent) continue;
+        const rr=r.userData.collisionRadius||.5;
+        if(distanceXZ(point,r.position)<radius+rr) return false;
+    }
+
+    for(const p of game.projects){
+        if(p.complete) continue;
+        if(distanceXZ(point,p.group.position)<radius+Math.hypot(p.data.width/2,p.data.depth/2)*.65) return false;
+    }
+
+    for(const b of game.finishedBuildings){
+        if(b===excludeBuilding) continue;
+        if(distanceXZ(point,b.group.position)<radius+Math.hypot(b.data.width/2,b.data.depth/2)*.65) return false;
+    }
+
+    if(!game.tentPacked && game.tent && distanceXZ(point,game.tent.position)<radius+3.4) return false;
+    return true;
+}
+
+function campPlacementIsValid(point){
+    const radius=4.1;
+    for(const r of game.resources){
+        if(!r.parent) continue;
+        if(distanceXZ(point,r.position)<radius+(r.userData.collisionRadius||.5)) return false;
+    }
+    for(const p of game.projects){
+        if(p.complete) continue;
+        if(distanceXZ(point,p.group.position)<radius+Math.hypot(p.data.width/2,p.data.depth/2)*.65) return false;
+    }
+    for(const b of game.finishedBuildings){
+        if(distanceXZ(point,b.group.position)<radius+Math.hypot(b.data.width/2,b.data.depth/2)*.65) return false;
+    }
+    return true;
+}
+
+function recolorPlacementGhost(valid){
+    if(!game.placementGhost) return;
+    game.placementGhost.traverse(child=>{
+        if(child.isMesh && child.material && child.material.color){
+            child.material.color.setHex(valid?0x61e66c:0xe05b55);
+        }
+    });
+}
+
+const raycaster=
+    new THREE.Raycaster();
+
+const mouse=
+    new THREE.Vector2();
+
+renderer.domElement
+.addEventListener(
+    "mousemove",
+    function(e){
+
+        if(
+            game.mode!=="placement"
+        )
+            return;
+
+        const rect=
+            renderer.domElement
+            .getBoundingClientRect();
+
+        mouse.x=
+            (
+                (
+                    e.clientX-
+                    rect.left
+                )/
+                rect.width
+            )*2-1;
+
+        mouse.y=
+            -(
+                (
+                    e.clientY-
+                    rect.top
+                )/
+                rect.height
+            )*2+1;
+
+        raycaster.setFromCamera(
+            mouse,
+            camera
+        );
+
+        const hit=
+            raycaster
+            .intersectObject(
+                ground
+            )[0];
+
+        if(!hit)
+            return;
+
+        const point=
+            hit.point.clone();
+
+        game.placementPosition=
+            point;
+
+        game.placementGhost
+            .position
+            .set(
+                point.x,
+                0,
+                point.z
+            );
+
+        game.placementGhost
+            .rotation.y=
+            game.placementRotation;
+
+        game.placementValid=placementIsValid(
+            game.selectedBuilding,
+            point
+        );
+        recolorPlacementGhost(game.placementValid);
+
+    }
+);
+
+renderer.domElement
+.addEventListener(
+    "click",
+    function(){
+
+        if(
+            game.mode!=="placement" ||
+            !game.placementPosition
+        )
+            return;
+
+        createConstructionSite(
+            game.selectedBuilding,
+            game.placementPosition.x,
+            game.placementPosition.z,
+            game.placementRotation
+        );
+
+        finishPlacement();
+
+    }
+);
+
+function finishPlacement(){
+
+    if(game.placementGhost){
+
+        scene.remove(
+            game.placementGhost
+        );
+
+    }
+
+    game.placementGhost=null;
+    game.placementPosition=null;
+
+    game.mode="explore";
+
+    document
+        .getElementById(
+            "placementUI"
+        )
+        .style.display="none";
+
+    document
+        .getElementById(
+            "hotbar"
+        )
+        .style.display="flex";
+
+    document
+        .getElementById(
+            "crosshair"
+        )
+        .style.display="block";
+
+    document
+        .getElementById(
+            "heldItem"
+        )
+        .style.display="block";
+
+    camera.position.copy(
+        player.position
+    );
+
+    camera.rotation.order="YXZ";
+    camera.rotation.y=player.yaw;
+    camera.rotation.x=player.pitch;
+
+    showMessage(
+        "CONSTRUCTION SITE CREATED"
+    );
+
+}
+
+function cancelPlacement(){
+    finishPlacement();
+}
+
+/* CONSTRUCTION */
+
+function createConstructionSite(
+    id,
+    x,
+    z,
+    rotation
+){
+
+    const data=
+        BUILDINGS[id];
+
+    const group=
+        new THREE.Group();
+
+    const dirt=
+        new THREE.Mesh(
+
+            new THREE.BoxGeometry(
+                data.width,
+                .12,
+                data.depth
+            ),
+
+            new THREE.MeshStandardMaterial({
+                color:0x846a47
+            })
+
+        );
+
+    dirt.position.y=.06;
+
+    group.add(dirt);
+
+    createFence(
+        group,
+        data.width,
+        data.depth
+    );
+
+    group.position.set(
+        x,
+        0,
+        z
+    );
+
+    group.rotation.y=
+        rotation;
+
+    scene.add(group);
+
+    game.projects.push({
+        id:id,
+        data:data,
+        group:group,
+        wood:0,
+        stone:0,
+        lumber:0,
+        iron:0,
+        complete:false,
+        rotation:rotation
+    });
+
+}
+
+function createFence(
+    group,
+    width,
+    depth
+){
+
+    const material=
+        new THREE.MeshStandardMaterial({
+            color:0x9c784c
+        });
+
+    const hw=
+        width/2+.7;
+
+    const hd=
+        depth/2+.7;
+
+    function post(x,z){
+
+        const p=
+            new THREE.Mesh(
+
+                new THREE.BoxGeometry(
+                    .18,
+                    1.3,
+                    .18
+                ),
+
+                material
+
+            );
+
+        p.position.set(
+            x,
+            .65,
+            z
+        );
+
+        group.add(p);
+
+    }
+
+    function rail(
+        x,
+        z,
+        length,
+        horizontal
+    ){
+
+        const r=
+            new THREE.Mesh(
+
+                new THREE.BoxGeometry(
+                    horizontal
+                    ? length
+                    : .13,
+
+                    .12,
+
+                    horizontal
+                    ? .13
+                    : length
+                ),
+
+                material
+
+            );
+
+        r.position.set(
+            x,
+            .72,
+            z
+        );
+
+        group.add(r);
+
+    }
+
+    post(-hw,-hd);
+    post(hw,-hd);
+    post(-hw,hd);
+    post(hw,hd);
+
+    rail(
+        0,
+        -hd,
+        width+1.4,
+        true
+    );
+
+    rail(
+        -hw,
+        0,
+        depth+1.4,
+        false
+    );
+
+    rail(
+        hw,
+        0,
+        depth+1.4,
+        false
+    );
+
+    rail(
+        -width*.3,
+        hd,
+        width*.3,
+        true
+    );
+
+    rail(
+        width*.3,
+        hd,
+        width*.3,
+        true
+    );
+
+}
+
+/* PROJECT MENU */
+
+function openProjectMenu(project){
+
+    game.activeProject=
+        project;
+
+    document
+        .getElementById(
+            "projectMenu"
+        )
+        .style.display="flex";
+
+    renderProjectMenu();
+
+}
+
+function renderProjectMenu(){
+    const p=game.activeProject;
+    if(!p) return;
+
+    document.getElementById("projectTitle").textContent=p.data.icon+" "+p.data.name;
+    document.getElementById("projectStage").textContent="CONSTRUCTION";
+
+    const rows=[];
+    if(p.data.wood) rows.push('<div class="materialRow"><span>🪵 Wood</span><b>'+p.wood+' / '+p.data.wood+'</b></div>');
+    if(p.data.stone) rows.push('<div class="materialRow"><span>🪨 Stone</span><b>'+p.stone+' / '+p.data.stone+'</b></div>');
+    if(p.data.lumber) rows.push('<div class="materialRow"><span>🪚 Lumber</span><b>'+p.lumber+' / '+p.data.lumber+'</b></div>');
+    if(p.data.iron) rows.push('<div class="materialRow"><span>⚙️ Iron</span><b>'+p.iron+' / '+p.data.iron+'</b></div>');
+
+    document.getElementById("projectMaterials").innerHTML=rows.join("");
+}
+
+document
+.getElementById(
+    "depositMaterials"
+)
+.addEventListener(
+    "click",
+    function(){
+        const p=game.activeProject;
+        if(!p) return;
+
+        const ids=["wood","stone","lumber","iron"];
+        let deliveredAny=false;
+
+        for(const id of ids){
+            const needed=p.data[id]||0;
+            if(needed<=0) continue;
+            const amount=Math.min(needed-(p[id]||0),backpackTotal(id));
+            if(amount>0){
+                p[id]=(p[id]||0)+amount;
+                removeFromBackpack(id,amount);
+                deliveredAny=true;
+            }
+        }
+
+        updateUI();
+
+        const complete=ids.every(id=>(p[id]||0)>=(p.data[id]||0));
+        if(complete){
+            completeProject(p);
+            return;
+        }
+
+        renderProjectMenu();
+        showMessage(deliveredAny ? "MATERIALS DELIVERED" : "YOU NEED MORE MATERIALS");
+    }
+);
+
+document
+.getElementById(
+    "cancelProject"
+)
+.addEventListener(
+    "click",
+    function(){
+
+        const p=
+            game.activeProject;
+
+        if(!p)
+            return;
+
+        const refundWood=addToBackpack("wood",p.wood||0);
+        const refundStone=addToBackpack("stone",p.stone||0);
+        const refundLumber=addToBackpack("lumber",p.lumber||0);
+        const refundIron=addToBackpack("iron",p.iron||0);
+        if(refundWood<(p.wood||0) || refundStone<(p.stone||0) ||
+           refundLumber<(p.lumber||0) || refundIron<(p.iron||0)){
+            showMessage("SOME REFUND COULD NOT FIT IN BACKPACK");
+        }
+
+        scene.remove(
+            p.group
+        );
+
+        game.projects=
+            game.projects.filter(
+                project=>
+                project!==p
+            );
+
+        closeAllPanels();
+        updateUI();
+
+        showMessage(
+            "PROJECT CANCELLED"
+        );
+
+    }
+);
+
+/* FINISHED BUILDING */
+
+function completeProject(p){
+
+    const x=
+        p.group.position.x;
+
+    const z=
+        p.group.position.z;
+
+    const rotation=
+        p.rotation;
+
+    scene.remove(
+        p.group
+    );
+
+    p.complete=true;
+
+    createFinishedBuilding(
+        p.id,
+        x,
+        z,
+        rotation
+    );
+
+    // After construction completes, stand safely in front of the entrance.
+    const spawnOffset=new THREE.Vector3(0,0,p.data.depth/2+2.25);
+    spawnOffset.applyAxisAngle(new THREE.Vector3(0,1,0),rotation);
+    player.position.set(
+        x+spawnOffset.x,
+        1.8,
+        z+spawnOffset.z
+    );
+    camera.position.copy(player.position);
+
+    game.completed[
+        p.id
+    ]=true;
+
+    closeAllPanels();
+
+    updateUI();
+
+    showMessage(
+        p.data.name.toUpperCase()+
+        " COMPLETE!"
+    );
+
+}
+
+function addBuildingBlocker(building,localX,localZ,radius=.38){
+    const local=new THREE.Vector3(localX,0,localZ);
+    building.group.localToWorld(local);
+    const blocker=new THREE.Object3D();
+    blocker.position.set(local.x,0,local.z);
+    blocker.userData.collisionRadius=radius;
+    scene.add(blocker);
+    game.collisions.push(blocker);
+    building.blockers.push(blocker);
+    return blocker;
+}
+
+function addPerimeterCollision(building,halfW,halfD,doorHalf=.9){
+    for(let x=-halfW;x<=halfW;x+=.8){
+        addBuildingBlocker(building,x,-halfD);
+        if(Math.abs(x)>doorHalf) addBuildingBlocker(building,x,halfD);
+    }
+    for(let z=-halfD+.5;z<=halfD-.5;z+=.8){
+        addBuildingBlocker(building,-halfW,z);
+        addBuildingBlocker(building,halfW,z);
+    }
+}
+
+function createFinishedBuilding(id,x,z,rotation){
+
+    const data=BUILDINGS[id];
+    const group=new THREE.Group();
+    group.position.set(x,0,z);
+    group.rotation.y=rotation;
+
+    const finished={id:id,data:data,group:group,blockers:[]};
+
+    if(id==="storage"){
+        const wood=new THREE.MeshStandardMaterial({color:0x8b6038,side:THREE.DoubleSide});
+        const dark=new THREE.MeshStandardMaterial({color:0x4b3323,side:THREE.DoubleSide});
+        const floorMat=new THREE.MeshStandardMaterial({color:0x70513a});
+        const W=5,D=4,H=3;
+
+        const floor=new THREE.Mesh(new THREE.BoxGeometry(W,.18,D),floorMat); floor.position.y=.09; group.add(floor);
+        const back=new THREE.Mesh(new THREE.BoxGeometry(W,H,.16),wood); back.position.set(0,H/2,-D/2); group.add(back);
+        const left=new THREE.Mesh(new THREE.BoxGeometry(.16,H,D),wood); left.position.set(-W/2,H/2,0); group.add(left);
+        const right=left.clone(); right.position.x=W/2; group.add(right);
+        // Front has a real doorway.
+        const frontLeft=new THREE.Mesh(new THREE.BoxGeometry(1.8,H,.16),wood); frontLeft.position.set(-1.6,H/2,D/2); group.add(frontLeft);
+        const frontRight=frontLeft.clone(); frontRight.position.x=1.6; group.add(frontRight);
+        const header=new THREE.Mesh(new THREE.BoxGeometry(1.4,.55,.16),dark); header.position.set(0,H-.275,D/2); group.add(header);
+        const roof=new THREE.Mesh(new THREE.BoxGeometry(5.5,.25,4.5),dark); roof.position.y=3.2; group.add(roof);
+
+        // Shelves/crates inside.
+        const shelf1=new THREE.Mesh(new THREE.BoxGeometry(1.8,1.5,.45),dark); shelf1.position.set(-1.35,.75,-1.45); group.add(shelf1);
+        const shelf2=shelf1.clone(); shelf2.position.x=1.35; group.add(shelf2);
+
+        finished.storage={name:"Storage Shed",level:1,capacity:10,slots:Array(10).fill(null),building:finished};
+        finished.storageVisual={wood:wood,dark:dark};
+        finished.interior={halfW:2.35,halfD:1.85};
+    }
+
+    if(id==="workshop"){
+        const wood=new THREE.MeshStandardMaterial({color:0x7e5d3d,side:THREE.DoubleSide});
+        const dark=new THREE.MeshStandardMaterial({color:0x453328,side:THREE.DoubleSide});
+        const stone=new THREE.MeshStandardMaterial({color:0x696963});
+        const metal=new THREE.MeshStandardMaterial({color:0x3e4143,metalness:.4,roughness:.6});
+        const W=6.5,D=4.8,H=3.4;
+
+        const floor=new THREE.Mesh(new THREE.BoxGeometry(W,.2,D),stone); floor.position.y=.1; group.add(floor);
+        const back=new THREE.Mesh(new THREE.BoxGeometry(W,H,.18),wood); back.position.set(0,H/2,-D/2); group.add(back);
+        const left=new THREE.Mesh(new THREE.BoxGeometry(.18,H,D),wood); left.position.set(-W/2,H/2,0); group.add(left);
+        const right=left.clone(); right.position.x=W/2; group.add(right);
+        const frontLeft=new THREE.Mesh(new THREE.BoxGeometry(2.25,H,.18),wood); frontLeft.position.set(-2.1,H/2,D/2); group.add(frontLeft);
+        const frontRight=frontLeft.clone(); frontRight.position.x=2.1; group.add(frontRight);
+        const header=new THREE.Mesh(new THREE.BoxGeometry(1.5,.6,.18),dark); header.position.set(0,H-.3,D/2); group.add(header);
+        const roof=new THREE.Mesh(new THREE.BoxGeometry(7,.3,5.3),dark); roof.position.y=3.65; group.add(roof);
+
+        // WORKBENCH — heavier timber bench with shelf, vise and pegboard
+        const benchTop=new THREE.Mesh(new THREE.BoxGeometry(2.25,.25,.9),dark);
+        benchTop.position.set(-1.85,1.02,-1.34); group.add(benchTop);
+
+        [-2.65,-1.05].forEach(x=>{
+            const legFront=new THREE.Mesh(new THREE.BoxGeometry(.2,1,.2),wood);
+            legFront.position.set(x,.5,-1.05); group.add(legFront);
+            const legBack=legFront.clone();
+            legBack.position.z=-1.63; group.add(legBack);
+        });
+
+        const lowerShelf=new THREE.Mesh(new THREE.BoxGeometry(1.75,.13,.62),wood);
+        lowerShelf.position.set(-1.85,.42,-1.34); group.add(lowerShelf);
+
+        const pegboard=new THREE.Mesh(new THREE.BoxGeometry(2.15,1.05,.1),wood);
+        pegboard.position.set(-1.85,1.78,-1.72); group.add(pegboard);
+
+        const viseBase=new THREE.Mesh(new THREE.BoxGeometry(.4,.23,.35),metal);
+        viseBase.position.set(-1.15,1.25,-1.18); group.add(viseBase);
+        const viseJaw=new THREE.Mesh(new THREE.BoxGeometry(.12,.35,.38),metal);
+        viseJaw.position.set(-.96,1.34,-1.18); group.add(viseJaw);
+
+        // SAW BENCH — proper timber table, circular blade and wood stock
+        const sawTop=new THREE.Mesh(new THREE.BoxGeometry(2.25,.28,1.0),wood);
+        sawTop.position.set(1.78,1.02,-1.34); group.add(sawTop);
+
+        [-2.0,2.0].forEach(()=>{}); // keeps this section easy to expand later
+        [1.05,2.5].forEach(x=>{
+            const leg1=new THREE.Mesh(new THREE.BoxGeometry(.2,1,.2),dark);
+            leg1.position.set(x,.5,-1.06); group.add(leg1);
+            const leg2=leg1.clone(); leg2.position.z=-1.62; group.add(leg2);
+        });
+
+        const sawBlade=new THREE.Mesh(
+            new THREE.CylinderGeometry(.42,.42,.09,24),
+            new THREE.MeshStandardMaterial({color:0x777d80,metalness:.8,roughness:.3})
+        );
+        sawBlade.rotation.z=Math.PI/2;
+        sawBlade.position.set(1.78,1.35,-1.34);
+        group.add(sawBlade);
+
+        const woodStock=new THREE.Mesh(new THREE.BoxGeometry(1.45,.18,.22),new THREE.MeshStandardMaterial({color:0xa87845}));
+        woodStock.position.set(1.55,1.28,-1.05);
+        woodStock.rotation.y=.12;
+        group.add(woodStock);
+
+        // STONE BENCH — masonry block with stone slab, hammer and chisel
+        const stoneBase=new THREE.Mesh(new THREE.BoxGeometry(2.15,.85,1.0),stone);
+        stoneBase.position.set(-1.85,.5,.82); group.add(stoneBase);
+
+        const slab=new THREE.Mesh(new THREE.BoxGeometry(1.55,.22,.7),new THREE.MeshStandardMaterial({color:0x858984}));
+        slab.position.set(-1.85,1.04,.82); group.add(slab);
+
+        const hammerHandle=new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,.72,8),wood);
+        hammerHandle.rotation.z=Math.PI/2;
+        hammerHandle.position.set(-1.8,1.25,.72);
+        group.add(hammerHandle);
+
+        const hammerHead=new THREE.Mesh(new THREE.BoxGeometry(.35,.16,.18),metal);
+        hammerHead.position.set(-1.45,1.25,.72);
+        group.add(hammerHead);
+
+        // FURNACE — stone furnace with hearth opening facing INWARD toward center aisle
+        const furnaceBase=new THREE.Mesh(new THREE.BoxGeometry(1.6,1.85,1.45),stone);
+        furnaceBase.position.set(1.95,.93,.78); group.add(furnaceBase);
+
+        const furnaceTop=new THREE.Mesh(new THREE.BoxGeometry(1.78,.28,1.62),dark);
+        furnaceTop.position.set(1.95,1.88,.78); group.add(furnaceTop);
+
+        // Opening is on the -X face, toward the middle of the workshop.
+        const furnaceMouth=new THREE.Mesh(
+            new THREE.BoxGeometry(.08,.72,.82),
+            new THREE.MeshStandardMaterial({
+                color:0x1b120d,
+                emissive:0xff5b16,
+                emissiveIntensity:1.15
+            })
+        );
+        furnaceMouth.position.set(1.11,.82,.78);
+        group.add(furnaceMouth);
+
+        const innerGlow=new THREE.PointLight(0xff6a22,1.35,4.5);
+        innerGlow.position.set(1.0,1.0,.78);
+        group.add(innerGlow);
+
+        // Integrated stone chimney: starts at the fireplace and continues through the roof.
+        const chimneyMat=new THREE.MeshStandardMaterial({
+            color:0x65635c,
+            roughness:1
+        });
+
+        // Interior chimney breast directly above the fireplace.
+        const chimneyBreast=new THREE.Mesh(
+            new THREE.BoxGeometry(1.22,H-2.05,.92),
+            chimneyMat
+        );
+        chimneyBreast.position.set(2.75,2.05+(H-2.05)/2,-2.48);
+        group.add(chimneyBreast);
+
+        // Exterior stack continues from the breast through and above the roof.
+        const chimneyStack=new THREE.Mesh(
+            new THREE.BoxGeometry(.92,2.9,.78),
+            chimneyMat
+        );
+        chimneyStack.position.set(2.75,H+1.15,-2.48);
+        group.add(chimneyStack);
+
+        const chimneyCap=new THREE.Mesh(
+            new THREE.BoxGeometry(1.12,.18,.98),
+            new THREE.MeshStandardMaterial({
+                color:0x494842,
+                roughness:1
+            })
+        );
+        chimneyCap.position.set(2.75,H+2.67,-2.48);
+        group.add(chimneyCap);
+
+        finished.stations={
+            workbench:{x:-1.9,z:-1.35,name:"Workbench"},
+            saw:{x:1.8,z:-1.35,name:"Saw Bench"},
+            stone:{x:-1.9,z:.85,name:"Stone Bench"},
+            furnace:{x:1.15,z:.8,name:"Furnace"}
+        };
+        finished.interior={halfW:3.05,halfD:2.2};
+    }
+
+    if(id==="cabin"){
+        const logMat=new THREE.MeshStandardMaterial({color:0x7d552f,roughness:.95});
+        const darkLog=new THREE.MeshStandardMaterial({color:0x50351f,roughness:1});
+        const plankMat=new THREE.MeshStandardMaterial({color:0x9d744b,roughness:.9});
+        const stoneMat=new THREE.MeshStandardMaterial({color:0x68645c,roughness:1});
+        const roofMat=new THREE.MeshStandardMaterial({color:0x3c342d,roughness:1});
+        const glassMat=new THREE.MeshStandardMaterial({color:0x9fc4c7,transparent:true,opacity:.55,roughness:.2});
+        const warmMat=new THREE.MeshStandardMaterial({color:0xffb14b,emissive:0xff6a22,emissiveIntensity:.8});
+
+        const W=8.6, D=6.8, H=3.35;
+        const wallT=.28;
+        const doorW=1.65;
+        const doorH=2.45;
+
+        // Floor
+        const floor=new THREE.Mesh(new THREE.BoxGeometry(W,.22,D),plankMat);
+        floor.position.y=.11;
+        group.add(floor);
+
+        // Back wall
+        const back=new THREE.Mesh(new THREE.BoxGeometry(W,H,wallT),logMat);
+        back.position.set(0,H/2,-D/2);
+        group.add(back);
+
+        // Side walls
+        const left=new THREE.Mesh(new THREE.BoxGeometry(wallT,H,D),logMat);
+        left.position.set(-W/2,H/2,0);
+        group.add(left);
+        const right=left.clone();
+        right.position.x=W/2;
+        group.add(right);
+
+        // Front wall pieces around central door
+        const frontSegW=(W-doorW)/2;
+        const frontL=new THREE.Mesh(new THREE.BoxGeometry(frontSegW,H,wallT),logMat);
+        frontL.position.set(-(doorW/2+frontSegW/2),H/2,D/2);
+        group.add(frontL);
+        const frontR=frontL.clone();
+        frontR.position.x=(doorW/2+frontSegW/2);
+        group.add(frontR);
+        const header=new THREE.Mesh(new THREE.BoxGeometry(doorW,H-doorH,wallT),logMat);
+        header.position.set(0,doorH+(H-doorH)/2,D/2);
+        group.add(header);
+
+        // Timber corner posts
+        [[-W/2,-D/2],[W/2,-D/2],[-W/2,D/2],[W/2,D/2]].forEach(([x,z])=>{
+            const post=new THREE.Mesh(new THREE.BoxGeometry(.42,H+.18,.42),darkLog);
+            post.position.set(x,H/2,z);
+            group.add(post);
+        });
+
+        // Pitched roof — corrected so both sides slope upward to the center ridge.
+        const roofLen=D+1.0;
+        const roofRun=W/2+.65;
+        const roofRise=1.75;
+        const roofSlopeLen=Math.sqrt(roofRun*roofRun+roofRise*roofRise);
+        const roofPitch=Math.atan2(roofRise,roofRun);
+
+        const roofGeo=new THREE.BoxGeometry(roofSlopeLen,.22,roofLen);
+
+        const roofL=new THREE.Mesh(roofGeo,roofMat);
+        roofL.position.set(-roofRun/2,H+roofRise/2,0);
+        roofL.rotation.z=roofPitch;
+        group.add(roofL);
+
+        const roofR=new THREE.Mesh(roofGeo,roofMat);
+        roofR.position.set(roofRun/2,H+roofRise/2,0);
+        roofR.rotation.z=-roofPitch;
+        group.add(roofR);
+
+        const ridge=new THREE.Mesh(
+            new THREE.BoxGeometry(.22,.22,roofLen+.05),
+            darkLog
+        );
+        ridge.position.set(0,H+roofRise,0);
+        group.add(ridge);
+
+        // Front and back gable walls — closes the triangular holes under the roof.
+        const gableMat=new THREE.MeshStandardMaterial({
+            color:0x7d552f,
+            roughness:.95,
+            side:THREE.DoubleSide
+        });
+        const gableShape=new THREE.Shape();
+        gableShape.moveTo(-W/2,H);
+        gableShape.lineTo(W/2,H);
+        gableShape.lineTo(0,H+roofRise);
+        gableShape.lineTo(-W/2,H);
+
+        const frontGable=new THREE.Mesh(
+            new THREE.ShapeGeometry(gableShape),
+            gableMat
+        );
+        frontGable.position.z=D/2+.01;
+        group.add(frontGable);
+
+        const backGable=new THREE.Mesh(
+            new THREE.ShapeGeometry(gableShape),
+            gableMat
+        );
+        backGable.position.z=-D/2-.01;
+        group.add(backGable);
+
+        // Porch
+        const porch=new THREE.Mesh(new THREE.BoxGeometry(4.3,.22,1.65),plankMat);
+        porch.position.set(0,.12,D/2+.85);
+        group.add(porch);
+
+        const step1=new THREE.Mesh(new THREE.BoxGeometry(2.1,.18,.62),plankMat);
+        step1.position.set(0,.09,D/2+1.8);
+        group.add(step1);
+
+        const step2=new THREE.Mesh(new THREE.BoxGeometry(1.7,.12,.48),plankMat);
+        step2.position.set(0,.03,D/2+2.28);
+        group.add(step2);
+
+        // Porch posts and little overhang
+        [-1.8,1.8].forEach(x=>{
+            const post=new THREE.Mesh(new THREE.BoxGeometry(.22,2.7,.22),darkLog);
+            post.position.set(x,1.35,D/2+1.2);
+            group.add(post);
+        });
+
+        const porchRoof=new THREE.Mesh(new THREE.BoxGeometry(4.8,.18,2.05),roofMat);
+        porchRoof.position.set(0,2.75,D/2+1.0);
+        porchRoof.rotation.x=-.08;
+        group.add(porchRoof);
+
+        // Front door — rebuilt flush with a clean frame.
+        const frameMat=new THREE.MeshStandardMaterial({color:0x3b291a,roughness:1});
+        const leafW=doorW-.14;
+        const leafH=doorH-.08;
+
+        const doorPivot=new THREE.Group();
+        doorPivot.position.set(-doorW/2+.07,0,D/2+.16);
+
+        const door=new THREE.Mesh(
+            new THREE.BoxGeometry(leafW,leafH,.12),
+            new THREE.MeshStandardMaterial({color:0x4a2f1d,roughness:.95})
+        );
+        door.position.set(leafW/2,leafH/2+.02,0);
+        doorPivot.add(door);
+
+        const knob=new THREE.Mesh(
+            new THREE.SphereGeometry(.065,8,8),
+            new THREE.MeshStandardMaterial({color:0x1f1b16,metalness:.4,roughness:.45})
+        );
+        knob.position.set(leafW-.16,leafH*.52,.09);
+        doorPivot.add(knob);
+        group.add(doorPivot);
+
+        // Frame overlaps both front-wall pieces slightly, hiding every seam around the doorway.
+        const leftJamb=new THREE.Mesh(new THREE.BoxGeometry(.20,doorH+.14,.20),frameMat);
+        leftJamb.position.set(-doorW/2,(doorH+.14)/2,D/2+.10);
+        group.add(leftJamb);
+        const rightJamb=new THREE.Mesh(new THREE.BoxGeometry(.20,doorH+.14,.20),frameMat);
+        rightJamb.position.set(doorW/2,(doorH+.14)/2,D/2+.10);
+        group.add(rightJamb);
+        const doorTopTrim=new THREE.Mesh(new THREE.BoxGeometry(doorW+.40,.20,.20),frameMat);
+        doorTopTrim.position.set(0,doorH+.06,D/2+.10);
+        group.add(doorTopTrim);
+
+        finished.cabinDoorPivot=doorPivot;
+        finished.cabinDoorOpen=false;
+
+
+        // Windows
+        function addWindow(x,y,z,rotY=0){
+            const frame=new THREE.Mesh(new THREE.BoxGeometry(1.7,1.35,.16),darkLog);
+            frame.position.set(x,y,z);
+            frame.rotation.y=rotY;
+            group.add(frame);
+
+            const pane=new THREE.Mesh(new THREE.BoxGeometry(1.38,1.05,.08),glassMat);
+            pane.position.set(x,y,z+(rotY===0?.1:0));
+            pane.rotation.y=rotY;
+            group.add(pane);
+
+            // crossbars
+            const barV=new THREE.Mesh(new THREE.BoxGeometry(.08,1.05,.11),darkLog);
+            barV.position.copy(pane.position);
+            barV.rotation.y=rotY;
+            group.add(barV);
+
+            const barH=new THREE.Mesh(new THREE.BoxGeometry(1.38,.08,.11),darkLog);
+            barH.position.copy(pane.position);
+            barH.rotation.y=rotY;
+            group.add(barH);
+        }
+        addWindow(-2.6,1.75,D/2+.08,0);
+        addWindow(2.6,1.75,D/2+.08,0);
+        addWindow(-W/2-.08,1.75,-.8,Math.PI/2);
+        addWindow(W/2+.08,1.75,.7,Math.PI/2);
+
+        // Fireplace along back wall
+        const hearth=new THREE.Mesh(new THREE.BoxGeometry(2.4,.28,1.25),stoneMat);
+        hearth.position.set(2.6,.14,-D/2+.72);
+        group.add(hearth);
+
+        // Improved stone fireplace with a recessed firebox, logs, embers and flames.
+        const fireplace=new THREE.Mesh(new THREE.BoxGeometry(2.3,2.5,.95),stoneMat);
+        fireplace.position.set(2.6,1.25,-D/2+.35);
+        group.add(fireplace);
+        const firebox=new THREE.Mesh(new THREE.BoxGeometry(1.30,1.18,.08),
+            new THREE.MeshStandardMaterial({color:0x15110e,roughness:1}));
+        firebox.position.set(2.6,.78,-D/2+.84);group.add(firebox);
+        const lintel=new THREE.Mesh(new THREE.BoxGeometry(1.66,.22,.22),stoneMat);
+        lintel.position.set(2.6,1.44,-D/2+.91);group.add(lintel);
+        [-.73,.73].forEach(dx=>{
+            const p=new THREE.Mesh(new THREE.BoxGeometry(.20,1.24,.22),stoneMat);
+            p.position.set(2.6+dx,.76,-D/2+.91);group.add(p);
+        });
+        [-.20,.20].forEach((dx,i)=>{
+            const log=new THREE.Mesh(new THREE.CylinderGeometry(.085,.085,.76,8),
+                new THREE.MeshStandardMaterial({color:0x3a2417,roughness:1}));
+            log.rotation.z=Math.PI/2;log.rotation.y=i?.18:-.18;
+            log.position.set(2.6+dx,.36,-D/2+.99);group.add(log);
+        });
+        const outerFlame=new THREE.Mesh(new THREE.ConeGeometry(.27,.68,8),
+            new THREE.MeshBasicMaterial({color:0xff7424}));
+        outerFlame.position.set(2.6,.69,-D/2+1.02);group.add(outerFlame);
+        const innerFlame=new THREE.Mesh(new THREE.ConeGeometry(.14,.43,8),
+            new THREE.MeshBasicMaterial({color:0xffc13b}));
+        innerFlame.position.set(2.6,.63,-D/2+1.08);group.add(innerFlame);
+        const embers=new THREE.Mesh(new THREE.BoxGeometry(.70,.07,.18),
+            new THREE.MeshBasicMaterial({color:0xb83d18}));
+        embers.position.set(2.6,.26,-D/2+1.01);group.add(embers);
+        const fireLight=new THREE.PointLight(0xff8a3d,1.55,6.5);
+        fireLight.position.set(2.6,1.02,-D/2+1.24);group.add(fireLight);
+
+        // Bed in back-left corner
+        const bedFrame=new THREE.Mesh(new THREE.BoxGeometry(2.6,.35,1.55),darkLog);
+        bedFrame.position.set(-2.6,.42,-2.0);
+        group.add(bedFrame);
+
+        const mattress=new THREE.Mesh(new THREE.BoxGeometry(2.45,.28,1.42),new THREE.MeshStandardMaterial({color:0xc7b89a}));
+        mattress.position.set(-2.6,.68,-2.0);
+        group.add(mattress);
+
+        const blanket=new THREE.Mesh(new THREE.BoxGeometry(1.25,.08,1.38),new THREE.MeshStandardMaterial({color:0x6c7d58}));
+        blanket.position.set(-2.0,.86,-2.0);
+        group.add(blanket);
+
+        const pillow=new THREE.Mesh(new THREE.BoxGeometry(.58,.18,1.1),new THREE.MeshStandardMaterial({color:0xe7e0ce}));
+        pillow.position.set(-3.35,.87,-2.0);
+        group.add(pillow);
+
+        finished.cabinBed=bedFrame;
+
+        // Keep the Cabin interior evenly lit: no harsh cast/receive shadows indoors.
+        group.traverse(obj=>{
+            if(obj.isMesh){
+                obj.castShadow=false;
+                obj.receiveShadow=false;
+            }
+        });
+
+        // Interior furniture collision: player cannot walk through solid furnishings.
+        function addCabinFurnitureBlocker(localX,localZ,radius){
+            const b=addBuildingBlocker(finished,localX,localZ,radius);
+            if(b) b.userData.cabinFurniture=true;
+            return b;
+        }
+
+        // Bed
+        addCabinFurnitureBlocker(-2.55,-1.75,1.15);
+
+        // Fireplace / hearth
+        addCabinFurnitureBlocker(2.75,-1.85,1.05);
+
+        // Table and chairs in the front-right corner
+        addCabinFurnitureBlocker(3.15,.55,.95);
+        addCabinFurnitureBlocker(3.15,-.85,.48);
+        addCabinFurnitureBlocker(3.15,1.95,.48);
+
+        // Interior chest / bench
+        addCabinFurnitureBlocker(-2.8,1.8,.7);
+
+        // Table and chairs — rotated 90° and placed against the right side wall.
+        const tableX=3.15;
+        const tableZ=.55;
+        const tableTop=new THREE.Mesh(
+            new THREE.BoxGeometry(1.25,.18,2.0),
+            plankMat
+        );
+        tableTop.position.set(tableX,1.05,tableZ);
+        group.add(tableTop);
+
+        [-.45,.45].forEach(dx=>{
+            [-.75,.75].forEach(dz=>{
+                const leg=new THREE.Mesh(
+                    new THREE.BoxGeometry(.14,.95,.14),
+                    darkLog
+                );
+                leg.position.set(tableX+dx,.5,tableZ+dz);
+                group.add(leg);
+            });
+        });
+
+        function addChair(x,z,rot=0){
+            const chair=new THREE.Group();
+            const seat=new THREE.Mesh(new THREE.BoxGeometry(.72,.14,.72),plankMat);
+            seat.position.y=.55;
+            chair.add(seat);
+            const backC=new THREE.Mesh(new THREE.BoxGeometry(.72,1.15,.14),darkLog);
+            backC.position.set(0,1.05,-.29);
+            chair.add(backC);
+            [-.27,.27].forEach(cx=>{
+                [-.27,.27].forEach(cz=>{
+                    const leg=new THREE.Mesh(new THREE.BoxGeometry(.1,.55,.1),darkLog);
+                    leg.position.set(cx,.27,cz);
+                    chair.add(leg);
+                });
+            });
+            chair.position.set(x,0,z);
+            chair.rotation.y=rot;
+            group.add(chair);
+        }
+        addChair(3.15,-.85,0);
+        addChair(3.15,1.95,Math.PI);
+
+        // Interior storage bench / chest
+        const chest=new THREE.Mesh(new THREE.BoxGeometry(1.5,.72,.72),darkLog);
+        chest.position.set(-2.8,.36,1.7);
+        group.add(chest);
+        const chestTop=new THREE.Mesh(new THREE.BoxGeometry(1.58,.16,.78),plankMat);
+        chestTop.position.set(-2.8,.78,1.7);
+        group.add(chestTop);
+
+        // Cabin lantern on table, visibly supported
+        // Matching frontier lantern on the cabin table.
+        const cabinLantern=createFrontierLantern(.72);
+        cabinLantern.position.set(tableX,1.14,tableZ);
+        group.add(cabinLantern);
+
+        // Interior rug
+        const rug=new THREE.Mesh(new THREE.BoxGeometry(2.6,.035,1.8),new THREE.MeshStandardMaterial({color:0x7f543f}));
+        rug.position.set(.25,.24,.35);
+        group.add(rug);
+
+        finished.interior={halfW:W/2-.45,halfD:D/2-.45};
+
+        // Walk-in collision perimeter with open front doorway.
+        addPerimeterCollision(
+            finished,
+            W/2,
+            D/2,
+            doorW/2+0.18
+        );
+        const cabinDoorBlocker=addBuildingBlocker(finished,0,D/2+.05,.62);
+        finished.cabinDoorBlocker=cabinDoorBlocker;
+
+        game.completed.cabin=true;
+        game.cabinBuilt=true;
+    }
+
+    group.traverse(child=>{if(child.isMesh){child.castShadow=true;child.receiveShadow=true;}});
+    scene.add(group);
+
+    // Walk-in collision for shed/workshop.
+    // Cabin already has its own wall + door collision above, so do NOT add a giant whole-building blocker.
+    if(id==="storage") addPerimeterCollision(finished,2.5,2.0,.8);
+    else if(id==="workshop") addPerimeterCollision(finished,3.25,2.4,.85);
+    else if(id!=="cabin"){
+        group.userData.collisionRadius=Math.min(data.width,data.depth)*.34;
+        game.collisions.push(group);
+    }
+
+    game.finishedBuildings.push(finished);
+}
+
+function updateStorageShedAppearance(storage){
+ const b=storage.building;if(!b||!b.storageVisual)return;if(!b.upgradeDecor)b.upgradeDecor=[];b.upgradeDecor.forEach(o=>b.group.remove(o));b.upgradeDecor=[];const dark=b.storageVisual.dark,wood=b.storageVisual.wood;const add=m=>{b.group.add(m);b.upgradeDecor.push(m);};
+ if(storage.level>=2){const shelf=new THREE.Mesh(new THREE.BoxGeometry(4.2,.18,.55),dark);shelf.position.set(0,1.75,-1.55);add(shelf);}
+ if(storage.level>=3){const l=new THREE.Mesh(new THREE.BoxGeometry(.45,2.2,2.6),wood);l.position.set(-2.15,1.1,0);add(l);const rr=l.clone();rr.position.x=2.15;add(rr);}
+ if(storage.level>=4){const loft=new THREE.Mesh(new THREE.BoxGeometry(4.3,.22,2.1),dark);loft.position.set(0,2.35,-.65);add(loft);const beam=new THREE.Mesh(new THREE.BoxGeometry(4.6,.22,.22),wood);beam.position.set(0,2.7,.35);add(beam);}
+}
+
+/* STORAGE */
+
+function openStorage(storage){
+    game.activeStorage=storage;
+    document.getElementById("storageMenu").style.display="flex";
+    renderStorage();
+}
+
+function transferOneStack(fromSlots,toSlots,fromIndex,toCapacity){
+    const source=fromSlots[fromIndex];
+    if(!source) return false;
+    const amount=source.count;
+    const added=addToSlots(toSlots,source.id,amount,toCapacity);
+    if(added<=0) return false;
+    source.count-=added;
+    if(source.count<=0) fromSlots[fromIndex]=null;
+    return true;
+}
+
+function renderStorage(){
+    const storage=game.activeStorage;
+    if(!storage) return;
+    document.getElementById("storageTitle").textContent="📦 "+storage.name.toUpperCase();
+    document.getElementById("storageInfo").textContent=storage.level>0 ? "LEVEL "+storage.level+" • "+storage.capacity+" STACKS" : storage.capacity+" STACKS";
+    const grid=document.getElementById("storageGrid");
+    grid.innerHTML="";
+    grid.style.gridTemplateColumns="repeat(5,1fr)";
+    for(let i=0;i<storage.capacity;i++){
+        const data=storage.slots[i]||null;
+        const slot=document.createElement("div");
+        slot.className="inventorySlot";
+        slot.innerHTML=data ? '<div class="itemIcon">'+ITEMS[data.id].icon+'</div><div class="itemName">'+ITEMS[data.id].name+'</div><div class="itemCount">'+data.count+(ITEMS[data.id].type==="material" || ITEMS[data.id].type==="food" || ITEMS[data.id].type==="plantable"?' / 50':'')+'</div>' : '<div style="opacity:.3">EMPTY</div>';
+        if(data){ slot.title="Click to move this stack to backpack"; slot.onclick=function(){ if(!transferOneStack(storage.slots,game.backpack,i,BACKPACK_SLOTS)) showMessage("BACKPACK FULL"); renderStorage(); renderBackpack(); updateUI(); }; }
+        grid.appendChild(slot);
+    }
+    const label=document.createElement("div");
+    label.style.cssText="grid-column:1/-1;margin-top:12px;font-weight:900;letter-spacing:1px";
+    label.textContent="YOUR BACKPACK • CLICK A STACK TO STORE IT";
+    grid.appendChild(label);
+    for(let i=0;i<BACKPACK_SLOTS;i++){
+        const data=game.backpack[i];
+        const slot=document.createElement("div"); slot.className="inventorySlot";
+        slot.innerHTML=data ? '<div class="itemIcon">'+ITEMS[data.id].icon+'</div><div class="itemName">'+ITEMS[data.id].name+'</div><div class="itemCount">'+data.count+(ITEMS[data.id].type==="material" || ITEMS[data.id].type==="food" || ITEMS[data.id].type==="plantable"?' / 50':'')+'</div>' : '<div style="opacity:.3">EMPTY</div>';
+        if(data){ slot.onclick=function(){ if(!transferOneStack(game.backpack,storage.slots,i,storage.capacity)) showMessage("STORAGE FULL"); renderStorage(); renderBackpack(); updateUI(); }; }
+        grid.appendChild(slot);
+    }
+    const upgrade=document.getElementById("upgradeStorage");
+    if(storage.level>0 && storage.level<4){
+        const next=[0,15,20,30][storage.level];
+        const costs=[null,{wood:15,stone:5},{wood:25,stone:10},{wood:40,stone:15}][storage.level];
+        upgrade.style.display="block";
+        upgrade.textContent="UPGRADE TO "+next+" STACKS • 🪵 "+costs.wood+" • 🪨 "+costs.stone;
+    }else upgrade.style.display="none";
+}
+
+document.getElementById("upgradeStorage").addEventListener("click",function(){
+    const storage=game.activeStorage;
+    if(!storage || storage.level<=0 || storage.level>=4) return;
+    const nextCaps=[0,15,20,30];
+    const costs=[null,{wood:15,stone:5},{wood:25,stone:10},{wood:40,stone:15}];
+    const cost=costs[storage.level];
+    if(backpackTotal("wood")<cost.wood || backpackTotal("stone")<cost.stone){ showMessage("YOU NEED MORE MATERIALS"); return; }
+    removeFromBackpack("wood",cost.wood); removeFromBackpack("stone",cost.stone);
+    storage.capacity=nextCaps[storage.level]; storage.level++;
+    while(storage.slots.length<storage.capacity) storage.slots.push(null);
+    updateStorageShedAppearance(storage);
+    renderStorage(); updateUI(); showMessage("STORAGE SHED UPGRADED");
+});
+
+/* WORKSHOP */
+
+function openWorkshopStation(building,station){
+    game.activeWorkshop={building:building,station:station};
+    document.getElementById("workshopMenu").style.display="flex";
+    renderWorkshop();
+}
+
+function workshopRecipeButton(label,enabled,onClick){
+    const b=document.createElement("button");
+    b.textContent=label;
+    b.disabled=!enabled;
+    b.onclick=onClick;
+    return b;
+}
+
+function renderWorkshop(){
+    const state=game.activeWorkshop;
+    if(!state) return;
+    const station=state.station;
+    const info=state.building.stations[station];
+    document.getElementById("workshopTitle").textContent="🪚 "+info.name.toUpperCase();
+    document.getElementById("workshopInfo").textContent="Materials come from your backpack.";
+    const c=document.getElementById("workshopContent");
+    c.innerHTML="";
+
+    function card(title,desc,recipe,buttonText,action,enabled=true){
+        const d=document.createElement("div"); d.className="stationCard";
+        d.innerHTML='<h3>'+title+'</h3><p>'+desc+'</p><div class="recipeLine">'+recipe+'</div>';
+        if(buttonText) d.appendChild(workshopRecipeButton(buttonText,enabled,action));
+        c.appendChild(d);
+    }
+
+    if(station==="workbench"){
+        card("Reinforced Axe","A stronger axe. Each successful chop gives 3 wood instead of 2.","🪚 5 Lumber + ⚙️ 2 Iron","CRAFT REINFORCED AXE",()=>craftToolUpgrade("axe"),!game.axeReinforced);
+        card("Reinforced Pickaxe","A stronger pickaxe. Each successful mining hit gives 3 stone instead of 2.","🪚 4 Lumber + ⚙️ 3 Iron","CRAFT REINFORCED PICKAXE",()=>craftToolUpgrade("pickaxe"),!game.pickaxeReinforced);
+        card("Repair Axe","Restore your axe to full durability.","🪵 2 Wood","REPAIR AXE",()=>repairTool("axe"),game.toolDurability.axe<game.toolMaxDurability.axe);
+        card("Repair Pickaxe","Restore your pickaxe to full durability.","🪨 2 Stone","REPAIR PICKAXE",()=>repairTool("pickaxe"),game.toolDurability.pickaxe<game.toolMaxDurability.pickaxe);
+    }
+    if(station==="saw"){
+        card("Make Lumber","Process rough wood into construction lumber.","🪵 5 Wood → 🪚 1 Lumber","PROCESS 1 LUMBER",()=>processWorkshopRecipe("wood",5,"lumber",1));
+    }
+    if(station==="stone"){
+        card("Cut Stone","Shape rough stone for more advanced construction.","🪨 5 Stone → 🧱 1 Cut Stone","CUT 1 STONE",()=>processWorkshopRecipe("stone",5,"cutStone",1));
+    }
+    if(station==="furnace"){
+        card("Smelt Iron","Heat raw iron ore into usable iron.","🟤 2 Raw Iron → ⚙️ 1 Iron","SMELT 1 IRON",()=>processWorkshopRecipe("rawIron",2,"iron",1));
+        card("Make Steel","Steel will be made here later, once we decide the full steel recipe and fuel system.","⚙️ Iron → 🔩 Steel","STEEL RECIPE LOCKED",()=>{},false);
+    }
+}
+
+function craftToolUpgrade(tool){
+    const isAxe=tool==="axe";
+    if((isAxe && game.axeReinforced) || (!isAxe && game.pickaxeReinforced)){
+        showMessage("TOOL ALREADY REINFORCED");
+        return;
+    }
+    const lumberNeeded=isAxe?5:4;
+    const ironNeeded=isAxe?2:3;
+    if(backpackTotal("lumber")<lumberNeeded || backpackTotal("iron")<ironNeeded){
+        showMessage("YOU NEED LUMBER AND IRON");
+        return;
+    }
+    removeFromBackpack("lumber",lumberNeeded);
+    removeFromBackpack("iron",ironNeeded);
+    if(isAxe) game.axeReinforced=true;
+    else game.pickaxeReinforced=true;
+    updateUI();
+    renderWorkshop();
+    showMessage(isAxe?"REINFORCED AXE CRAFTED":"REINFORCED PICKAXE CRAFTED");
+}
+
+function repairTool(tool){
+ const mat=tool==="axe"?"wood":"stone";
+ if(backpackTotal(mat)<2){showMessage("YOU NEED 2 "+ITEMS[mat].name.toUpperCase());return;}
+ removeFromBackpack(mat,2); game.toolDurability[tool]=game.toolMaxDurability[tool]; updateUI(); renderWorkshop(); showMessage(tool.toUpperCase()+" REPAIRED");
+}
+
+function processWorkshopRecipe(inputId,inputCount,outputId,outputCount){
+    if(backpackTotal(inputId)<inputCount){showMessage("YOU NEED MORE "+ITEMS[inputId].name.toUpperCase());return;}
+    if(!canAddToSlots(game.backpack,outputId,outputCount,BACKPACK_SLOTS)){showMessage("BACKPACK FULL");return;}
+    removeFromBackpack(inputId,inputCount);
+    addToBackpack(outputId,outputCount);
+    updateUI();
+    renderWorkshop();
+    showMessage(ITEMS[outputId].name.toUpperCase()+" CREATED");
+}
+
+/* PROMPT */
+
+function updatePrompt(){
+    // Cabin door prompt: only show when close AND the center white dot is aimed toward the door.
+    for(const cabin of game.finishedBuildings){
+        if(cabin.id!=="cabin" || !cabin.cabinDoorPivot) continue;
+
+        const doorPos=new THREE.Vector3(0,1.35,cabin.data.depth/2+.22);
+        doorPos.applyAxisAngle(new THREE.Vector3(0,1,0),cabin.group.rotation.y);
+        doorPos.add(cabin.group.position);
+
+        const toDoor=doorPos.clone().sub(camera.position);
+        const doorDistance=toDoor.length();
+
+        if(doorDistance<3.2){
+            toDoor.normalize();
+
+            const lookDir=new THREE.Vector3();
+            camera.getWorldDirection(lookDir);
+
+            // If you're right beside the door, show the prompt automatically.
+            // From farther away, the white dot still needs to be aimed toward it.
+            if(doorDistance<1.65 || lookDir.dot(toDoor)>.94){
+                const prompt=document.getElementById("prompt");
+                prompt.textContent=
+                    cabin.cabinDoorOpen
+                    ? "E • CLOSE DOOR"
+                    : "E • OPEN DOOR";
+                prompt.style.opacity=1;
+                return;
+            }
+        }
+    }
+
+
+    const prompt=
+        document.getElementById(
+            "prompt"
+        );
+
+    for(const b of game.finishedBuildings){
+        if(b.id==="cabin" && b.cabinBed){
+            const bedPos=new THREE.Vector3();
+            b.cabinBed.getWorldPosition(bedPos);
+            if(distanceXZ(player.position,bedPos)<2.1){
+                prompt.innerHTML=canSleepNow()
+                    ?"<b>E</b> • SLEEP IN CABIN"
+                    :"CABIN BED • SLEEP AVAILABLE AT SUNSET";
+                prompt.style.opacity=1;
+                return;
+            }
+        }
+    }
+
+    if(selectedItem()==="berries" && game.mode==="explore" && !anyPanelOpen()){
+        if(game.hunger<100){
+            prompt.innerHTML="<b>E</b> • EAT BERRY • 🍽️ +1%";
+            prompt.style.opacity=1;
+            return;
+        }
+    }
+
+    if(selectedItem()==="sapling" && game.mode==="explore" && !anyPanelOpen()){
+        prompt.innerHTML="<b>E</b> • PLANT SAPLING";
+        prompt.style.opacity=1;
+        return;
+    }
+
+    if(
+        game.mode!=="explore" ||
+        anyPanelOpen()
+    ){
+
+        prompt.style.opacity=0;
+
+        return;
+
+    }
+
+    const project=
+        nearbyProject();
+
+    if(project){
+
+        prompt.innerHTML=
+            "<b>E</b> • "+
+            project.data.name+
+            " CONSTRUCTION SITE";
+
+        prompt.style.opacity=1;
+
+        return;
+
+    }
+
+    for(const finished of game.finishedBuildings){
+        if(finished.id==="storage" && isInsideBuilding(finished)){
+            prompt.innerHTML="<b>E</b> • OPEN THIS STORAGE SHED";
+            prompt.style.opacity=1;
+            return;
+        }
+        if(finished.id==="workshop" && isInsideBuilding(finished)){
+            const station=nearbyWorkshopStation(finished);
+            prompt.innerHTML=station ? "<b>E</b> • USE "+finished.stations[station].name.toUpperCase() : "MOVE NEAR A WORKSHOP STATION";
+            prompt.style.opacity=1;
+            return;
+        }
+    }
+
+    if(game.bedroll){const bedPos=new THREE.Vector3();game.bedroll.getWorldPosition(bedPos);if(distanceXZ(player.position,bedPos)<2.0){prompt.innerHTML=canSleepNow()?"<b>E</b> • SLEEP UNTIL AFTER SUNRISE":"SLEEP AVAILABLE AT SUNSET";prompt.style.opacity=1;return;}}
+
+    if(
+        distanceXZ(
+            player.position,
+            tentCratePosition()
+        )
+        <2.3
+    ){
+
+        prompt.innerHTML=
+            "<b>E</b> • OPEN STORAGE CRATE";
+
+        prompt.style.opacity=1;
+
+        return;
+
+    }
+
+    const resource=
+        nearbyResource();
+
+    if(!resource){
+
+        prompt.style.opacity=0;
+
+        return;
+
+    }
+
+    const selected=
+        selectedItem();
+
+    if(resource.userData.berryBush){
+        prompt.innerHTML=resource.userData.available
+            ? "<b>Q</b> • PICK 2 BERRIES"
+            : "BERRIES REGROWING";
+        prompt.style.opacity=1;
+        return;
+    }
+
+    if(resource.userData.growingSapling){
+        const remaining=Math.max(0,resource.userData.matureAt-absoluteGameMinutes());
+        const daysLeft=Math.max(1,Math.ceil(remaining/1440));
+        prompt.innerHTML="SAPLING GROWING • "+daysLeft+" DAY"+(daysLeft===1?"":"S")+" LEFT";
+        prompt.style.opacity=1;
+        return;
+    }
+
+    if(resource.userData.bush){
+        prompt.style.opacity=0;
+        return;
+    }
+
+    if(resource.userData.type==="wood"){
+        if(selected==="axe"){
+            const canopy=nextTreeCanopy(resource);
+
+            if(canopy && lookingUpForCanopy()){
+                prompt.innerHTML="<b>E</b> • HARVEST CANOPY";
+            }else{
+                prompt.innerHTML="<b>Q</b> • CHOP TREE";
+            }
+        }else{
+            prompt.innerHTML="SELECT AXE";
+        }
+
+    }else{
+
+        prompt.innerHTML=
+            selected==="pickaxe"
+            ? "<b>Q</b> • MINE ROCK"
+            : "SELECT PICKAXE";
+
+    }
+
+    prompt.style.opacity=1;
+
+}
+
+/* GOALS */
+
+function updateGoal(){
+
+    let text=
+        "Gather materials and build a Storage Shed.";
+
+    let progress=
+        "Camp";
+
+    if(game.completed.storage){
+
+        text=
+            "Build a Workshop.";
+
+    }
+
+    if(game.completed.workshop){
+
+        text=
+            "Build your first Cabin.";
+
+        progress=
+            "Homestead";
+
+    }
+
+    if(game.completed.cabin){
+
+        text=
+            "HOMESTEAD ESTABLISHED";
+
+        progress=
+            "Established";
+
+    }
+
+    document
+        .getElementById(
+            "goalText"
+        )
+        .textContent=
+        text;
+
+    document
+        .getElementById(
+            "progressCount"
+        )
+        .textContent=
+        progress;
+
+}
+
+/* ======================================================
+   DAY / NIGHT CYCLE
+====================================================== */
+
+function canSleepNow(){return game.timeOfDayMinutes>=1020 || game.timeOfDayMinutes<420;}
+function sleepUntilMorning(){
+    if(game.sleeping) return;
+    game.sleeping=true;
+    document.body.style.transition="filter .45s";
+    document.body.style.filter="brightness(0)";
+    setTimeout(function(){
+        if(game.timeOfDayMinutes>=1020) game.dayNumber++;
+        game.timeOfDayMinutes=420;
+        game.hunger=Math.max(0,game.hunger-8);
+        document.body.style.filter="brightness(1)";
+        game.sleeping=false;
+        showMessage("GOOD MORNING • 7:00 AM");
+        updateUI();
+    },500);
+}
+function updateHunger(delta){
+    if(!game.running || game.sleeping) return;
+
+    // This timer carries across standing, walking, and sprinting.
+    // It resets ONLY when hunger actually drops by 1%.
+    game.hungerActionTimer+=delta;
+
+    const moving=
+        !!(
+            keys["KeyW"] ||
+            keys["KeyA"] ||
+            keys["KeyS"] ||
+            keys["KeyD"]
+        );
+
+    const sprinting=
+        moving &&
+        !!(
+            keys["ShiftLeft"] ||
+            keys["ShiftRight"]
+        );
+
+    const secondsPerPercent=
+        sprinting ? 15 :
+        moving ? 30 :
+        120;
+
+    if(game.hunger>0 && game.hungerActionTimer>=secondsPerPercent){
+        game.hunger=Math.max(0,game.hunger-1);
+        game.hungerActionTimer=0;
+
+        // Refresh the HUD immediately whenever hunger drops by 1%.
+        updateUI();
+    }
+
+    // Keep the existing low-hunger movement slowdown.
+    const speedMultiplier=game.hunger>=80 ? 1 : game.hunger/100;
+    player.normalSpeed=7*speedMultiplier;
+    player.sprintSpeed=12*speedMultiplier;
+}
+
+function formatGameTime(totalMinutes){
+    const minutes=Math.floor(totalMinutes)%1440;
+    const hour24=Math.floor(minutes/60);
+    const minute=minutes%60;
+    const suffix=hour24>=12 ? "PM" : "AM";
+    const hour12=(hour24%12)||12;
+    return hour12+":"+String(minute).padStart(2,"0")+" "+suffix;
+}
+
+function getTimeLabel(minutes){
+
+    if(minutes>=360 && minutes<540) return "MORNING";
+    if(minutes>=540 && minutes<1020) return "DAYTIME";
+    if(minutes>=1020 && minutes<1080) return "SUNSET";
+    if(minutes>=1080 || minutes<300) return "NIGHT";
+    return "DAWN";
+
+}
+
+function smooth01(value){
+    value=Math.max(0,Math.min(1,value));
+    return value*value*(3-2*value);
+}
+
+function updateDayNight(delta){
+
+    if(!game.running) return;
+
+    // 1440 game minutes / 1440 real seconds = 1 game minute per second.
+    // Sunrise-to-sunset is 12 real minutes; sunset-to-sunrise is 12 real minutes.
+    game.timeOfDayMinutes += delta;
+
+    if(game.timeOfDayMinutes>=1440){
+        game.timeOfDayMinutes-=1440;
+        game.dayNumber++;
+    }
+
+    const minutes=game.timeOfDayMinutes;
+    const isDay=minutes>=360 && minutes<1080;
+
+    // Day progress: 06:00 -> 18:00. Night progress: 18:00 -> next 06:00.
+    let phase;
+    if(isDay){
+        phase=(minutes-360)/720;
+    }else{
+        phase=minutes>=1080
+            ? (minutes-1080)/720
+            : (minutes+360)/720;
+    }
+
+    // Both bodies rise in the east, arc overhead, and set in the west.
+    const angle=phase*Math.PI;
+    const radius=105;
+    const x=Math.cos(angle)*radius;
+    const y=Math.sin(angle)*82+5;
+    const z=-45;
+
+    if(isDay){
+        sunDisc.visible=true;
+        moonDisc.visible=false;
+        sunDisc.position.set(x,y,z);
+        sunLight.position.set(x,y,z);
+        sunLight.target.position.set(player.position.x,0,player.position.z);
+        scene.add(sunLight.target);
+    }else{
+        sunDisc.visible=false;
+        moonDisc.visible=true;
+        moonDisc.position.set(x,y,z);
+        moonLight.position.set(x,y,z);
+        moonLight.target.position.set(player.position.x,0,player.position.z);
+        scene.add(moonLight.target);
+    }
+
+    // Sunrise and sunset fade over one in-game hour on each side.
+    let daylight;
+    if(minutes>=360 && minutes<420){
+        daylight=smooth01((minutes-360)/60);
+    }else if(minutes>=420 && minutes<1020){
+        daylight=1;
+    }else if(minutes>=1020 && minutes<1080){
+        daylight=1-smooth01((minutes-1020)/60);
+    }else{
+        daylight=0;
+    }
+
+    // Slight moonlight keeps nighttime playable.
+    sunLight.intensity=2.0*daylight;
+    moonLight.intensity=isDay ? 0 : .38;
+    hemiLight.intensity=.38+(1.32*daylight);
+
+    // Warm tint around sunrise/sunset, blue-black at night.
+    const skyColor=new THREE.Color();
+    if(daylight<=.05){
+        skyColor.copy(skyNight);
+    }else if(daylight<.42){
+        const t=daylight/.42;
+        skyColor.copy(skyNight).lerp(skyDawn,t);
+    }else{
+        const t=(daylight-.42)/.58;
+        skyColor.copy(skyDawn).lerp(skyDay,t);
+    }
+
+    scene.background.copy(skyColor);
+    scene.fog.color.copy(fogNight).lerp(fogDay,daylight);
+
+    document.getElementById("gameClock").textContent=
+        formatGameTime(minutes);
+
+    document.getElementById("timeLabel").textContent=
+        getTimeLabel(minutes)+" • DAY "+game.dayNumber;
+
+}
+
+/* UI */
+
+function updateUI(){
+    document.getElementById("hungerCount").textContent=Math.round(game.hunger);
+
+    document
+        .getElementById(
+            "woodCount"
+        )
+        .textContent=
+        backpackTotal("wood");
+
+    document
+        .getElementById(
+            "stoneCount"
+        )
+        .textContent=
+        backpackTotal("stone");
+
+    updateHotbar();
+    updateGoal();
+
+}
+
+let messageTimer;
+
+function showMessage(text){
+
+    const box=
+        document.getElementById(
+            "message"
+        );
+
+    box.textContent=text;
+    box.style.opacity=1;
+
+    clearTimeout(
+        messageTimer
+    );
+
+    messageTimer=
+        setTimeout(
+            function(){
+
+                box.style.opacity=0;
+
+            },
+            1500
+        );
+
+}
+
+/* PANELS */
+
+function anyPanelOpen(){
+
+    return [
+        "backpack",
+        "buildingMenu",
+        "projectMenu",
+        "storageMenu",
+        "workshopMenu"
+    ]
+    .some(
+        id=>
+        document
+        .getElementById(id)
+         .style.display!=="none" && document.getElementById(id).style.display!==""
+    );
+
+}
+
+function closeAllPanels(){
+
+    [
+        "backpack",
+        "buildingMenu",
+        "projectMenu",
+        "storageMenu",
+        "workshopMenu"
+    ]
+    .forEach(
+        id=>
+        document
+        .getElementById(id)
+        .style.display="none"
+    );
+
+    game.activeProject=null;
+    game.activeWorkshop=null;
+
+}
+
+/* BUTTONS */
+
+document
+.getElementById(
+    "backpackButton"
+)
+.addEventListener(
+    "click",
+    openBackpack
+);
+
+document
+.getElementById(
+    "closeBackpack"
+)
+.addEventListener(
+    "click",
+    closeAllPanels
+);
+
+document.getElementById("buildTab").addEventListener("click",function(e){
+    e.stopPropagation();
+    showBuildTab("build");
+});
+
+document.getElementById("moveTab").addEventListener("click",function(e){
+    e.stopPropagation();
+    showBuildTab("move");
+});
+
+document
+.getElementById(
+    "closeBuildingMenu"
+)
+.addEventListener(
+    "click",
+    closeAllPanels
+);
+
+document
+.getElementById(
+    "closeProject"
+)
+.addEventListener(
+    "click",
+    closeAllPanels
+);
+
+document
+.getElementById(
+    "closeStorage"
+)
+.addEventListener(
+    "click",
+    closeAllPanels
+);
+
+document.getElementById("closeWorkshop").addEventListener("click",closeAllPanels);
+
+function enterFrontierWorld(){
+    if(game.running) return;
+    if(!game.worldReady){
+        game.enterRequested=true;
+        const enter=document.getElementById("enter");
+        enter.disabled=true;
+        enter.textContent="PREPARING WORLD...";
+        beginWorldBootstrap();
+        return;
+    }
+
+    game.enterRequested=false;
+    game.running=true;
+
+    document.getElementById("start").style.display="none";
+    document.getElementById("hud").style.display="block";
+    showMessage("WELCOME TO FRONTIER");
+}
+
+document
+.getElementById(
+    "enter"
+)
+.addEventListener(
+    "click",
+    enterFrontierWorld
+);
+
+
+const movePlacementRaycaster=new THREE.Raycaster();
+const movePlacementMouse=new THREE.Vector2();
+
+window.addEventListener("mousemove",function(e){
+    if(game.mode!=="moveBuilding" && game.mode!=="tentPlacement") return;
+
+    const rect=renderer.domElement.getBoundingClientRect();
+    movePlacementMouse.x=((e.clientX-rect.left)/rect.width)*2-1;
+    movePlacementMouse.y=-((e.clientY-rect.top)/rect.height)*2+1;
+
+    movePlacementRaycaster.setFromCamera(movePlacementMouse,camera);
+    const hit=movePlacementRaycaster.intersectObject(ground)[0];
+    if(!hit) return;
+
+    const point=hit.point.clone();
+
+    if(game.mode==="moveBuilding" && game.movingBuilding){
+        game.movingBuilding.group.position.set(point.x,0,point.z);
+        updateMovedBuildingBlockers();
+
+        const valid=placementIsValid(
+            game.movingBuilding.id,
+            point,
+            game.movingBuilding
+        );
+        game.placementValid=valid;
+        setBuildingMovePreview(game.movingBuilding,valid);
+    }
+
+    if(game.mode==="tentPlacement" && game.placementGhost){
+        game.placementPosition.copy(point);
+        game.placementGhost.position.set(point.x,0,point.z);
+        game.placementGhost.rotation.y=game.placementRotation;
+        game.placementValid=campPlacementIsValid(point);
+        recolorPlacementGhost(game.placementValid);
+    }
+});
+
+window.addEventListener("keydown",function(e){
+    if(game.mode!=="moveBuilding" && game.mode!=="tentPlacement") return;
+
+    if(e.code==="KeyR"){
+        if(game.mode==="moveBuilding" && game.movingBuilding){
+            game.movingBuilding.group.rotation.y+=Math.PI/2;
+            updateMovedBuildingBlockers();
+        }else{
+            game.placementRotation+=Math.PI/2;
+            if(game.placementGhost) game.placementGhost.rotation.y=game.placementRotation;
+        }
+        e.preventDefault();
+    }
+
+    if(e.code==="Escape"){
+        if(game.mode==="moveBuilding") cancelMoveBuilding();
+        else{
+            if(game.placementGhost){
+                scene.remove(game.placementGhost);
+                game.placementGhost=null;
+            }
+            game.mode="explore";
+            document.getElementById("placementUI").style.display="none";
+            exitBirdsEye();
+            showMessage("TENT PLACEMENT CANCELED");
+        }
+        e.preventDefault();
+    }
+});
+
+window.addEventListener("mousedown",function(e){
+    if(e.button!==0) return;
+
+    if(game.mode==="moveBuilding" && game.movingBuilding){
+        if(game.placementValid===false){
+            showMessage("CAN'T MOVE BUILDING HERE");
+            e.preventDefault();
+            return;
+        }
+        // Return visual materials to normal if an invalid preview made them transparent.
+        game.movingBuilding.group.traverse(child=>{
+            if(child.isMesh && child.material){
+                child.material.opacity=1;
+                child.material.transparent=false;
+            }
+        });
+        confirmMoveBuilding();
+        e.preventDefault();
+    }
+
+    if(game.mode==="tentPlacement" && game.placementGhost){
+        if(game.placementValid===false){
+            showMessage("CAN'T SET UP CAMP HERE");
+            e.preventDefault();
+            return;
+        }
+
+        const p=game.placementPosition.clone();
+        const r=game.placementRotation;
+        scene.remove(game.placementGhost);
+        game.placementGhost=null;
+        game.mode="explore";
+        document.getElementById("placementUI").style.display="none";
+        placeTentCampAt(p.x,p.z,r);
+        exitBirdsEye();
+        e.preventDefault();
+    }
+});
+
+/* LOOP */
+
+let previous=
+    performance.now();
+
+let slowWorldUpdateAccumulator=0;
+
+function animate(){
+
+    requestAnimationFrame(
+        animate
+    );
+
+    const now=
+        performance.now();
+
+    let delta=
+        (now-previous)/1000;
+
+    previous=now;
+
+    delta=
+        Math.min(
+            delta,
+            .05
+        );
+
+    updateDayNight(delta);
+    updateHunger(delta);
+
+    // Slow world timers use absolute in-game time, so checking them 4x/second
+    // gives the same regrowth/maturity times without scanning all resources
+    // every rendered frame.
+    slowWorldUpdateAccumulator+=delta;
+    if(slowWorldUpdateAccumulator>=.25){
+        slowWorldUpdateAccumulator%=.25;
+        updateBerryRegrowth();
+        updateTreeCanopyRegrowth();
+        updatePlantedSaplings();
+    }
+
+    updatePlayer(delta);
+    updateWildlife(delta);
+
+    updatePrompt();
+
+    renderer.render(
+        scene,
+        camera
+    );
+
+}
+
+updateUI();
+animate();
+
+// Let the browser paint the start screen first, then use idle time to prepare
+// the full world in short chunks. Usually much of this is complete before the
+// player even clicks ENTER WORLD.
+requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+        setTimeout(beginWorldBootstrap,0);
+    });
+});
+
+window.addEventListener(
+    "resize",
+    function(){
+
+        camera.aspect=
+            innerWidth/
+            innerHeight;
+
+        camera
+            .updateProjectionMatrix();
+
+        renderer.setSize(
+            innerWidth,
+            innerHeight
+        );
+
+    }
+);
+
+});
+</script>
+
+</body>
+</htmlfunction projectMaterialsText(project){
+    return Object.entries(project.data.cost).map(([id,needed])=>{
+        const have=project.delivered[id]||0;
+        return ITEMS[id].icon+" "+have+"/"+needed+" "+ITEMS[id].name;
+    }).join(" • ");
+}
+
+>
